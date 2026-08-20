@@ -91,18 +91,23 @@ export function smoothLipSync(state, features, dtMs = 16) {
     }
   } else {
     state.pendingViseme = candidate;
+    state.pendingMs = dt;
+  }
+
+  if (state.open < 0.025) {
+    state.viseme = "CLOSED";
+    state.pendingViseme = "CLOSED";
     state.pendingMs = 0;
   }
 
-  if (state.open < 0.025) state.viseme = "CLOSED";
   return {
     open: clamp01(state.open),
     weight: clamp01(state.weight),
     viseme: state.viseme,
     noiseFloor: state.noiseFloor,
     rms,
-    low: Number(features?.low) || 0,
-    mid: Number(features?.mid) || 0,
-    high: Number(features?.high) || 0,
+    low: Math.max(0, Number(features?.low) || 0),
+    mid: Math.max(0, Number(features?.mid) || 0),
+    high: Math.max(0, Number(features?.high) || 0),
   };
 }

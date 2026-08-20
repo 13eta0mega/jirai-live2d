@@ -10,6 +10,7 @@ export interface AvatarSnapshot {
   emotion: EmotionId; mouthOpen: number; mouthForm: number; viseme: Viseme; lipSyncMode: LipSyncMode;
   blinkLevel: number; breath: number; fps: number; parameters: Record<string, number>;
   audio: AudioFeatures & { noiseFloor?: number; open?: number; weight?: number; viseme?: Viseme };
+  missingParts: string[];
 }
 export interface AvatarController {
   setEmotion(id: EmotionId, options?: EmotionOptions): Promise<void>;

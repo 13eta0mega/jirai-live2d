@@ -3,72 +3,45 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Jirai 2D Avatar · Raster Rig Runtime v0.2</title>
+    <title>Jirai 2D Avatar · Raster Rig Runtime v0.2.1</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="shell">
       <header class="hero">
         <div>
-          <p class="eyebrow">RASTER RIG RUNTIME · v0.2</p>
+          <p class="eyebrow">RASTER RIG RUNTIME · v0.2.1</p>
           <h1>Jirai 2D Avatar</h1>
           <p class="sub">마이크 립싱크 · 감정별 모션 · 눈깜빡임 · 시선 추적 · 전환 블렌딩</p>
         </div>
         <div class="status-pill" id="fpsValue">-- FPS</div>
       </header>
-
       <section class="workspace">
         <div class="stage-card">
           <div class="stage-topline"><span>현재 감정</span><strong id="emotionNow">불러오는 중…</strong></div>
           <div class="canvas-wrap"><canvas id="avatarCanvas" aria-label="Jirai 아바타 미리보기"></canvas></div>
           <div class="stage-note">※ 실제 Cubism `.moc3/.model3.json` 모델이 아닌 원본 PNG 기반 래스터 리그입니다. 캔버스 위에서 포인터를 움직이면 시선/머리 반응을 확인할 수 있습니다.</div>
         </div>
-
         <aside class="controls-card">
           <section class="control-section">
-            <div class="section-title">감정 16종</div>
-            <div class="emotion-grid" id="emotionButtons"></div>
-            <div class="button-row">
-              <button class="secondary" id="cycleButton" type="button">16종 순환</button>
-              <button class="secondary" id="qaButton" type="button">전환 QA</button>
-              <button class="secondary" id="resetButton" type="button">초기화</button>
-            </div>
+            <div class="section-title">감정 16종</div><div class="emotion-grid" id="emotionButtons"></div>
+            <div class="button-row"><button class="secondary" id="cycleButton" type="button">16종 순환</button><button class="secondary" id="qaButton" type="button">전환 QA</button><button class="secondary" id="resetButton" type="button">초기화</button></div>
           </section>
-
           <section class="control-section">
             <div class="section-title">입 / 립싱크</div>
             <label class="range-label" for="mouthSlider"><span>MouthOpenY</span><output id="mouthValue">0.00</output></label>
             <input id="mouthSlider" type="range" min="0" max="1" step="0.01" value="0" />
             <div class="button-row"><button class="secondary" id="microphoneButton" type="button">마이크 립싱크 시작</button></div>
-            <div class="audio-grid">
-              <div><span>mode</span><strong id="audioMode">manual</strong></div>
-              <div><span>viseme</span><strong id="visemeValue">CLOSED</strong></div>
-              <div><span>RMS</span><strong id="audioLevel">0.000</strong></div>
-            </div>
+            <div class="audio-grid"><div><span>mode</span><strong id="audioMode">manual</strong></div><div><span>viseme</span><strong id="visemeValue">CLOSED</strong></div><div><span>RMS</span><strong id="audioLevel">0.000</strong></div></div>
             <div class="audio-meter"><div id="audioMeterFill"></div></div>
             <p class="hint">마이크 입력은 RMS와 저/중/고역 에너지를 분석해 A/I/U/E/O 계열 viseme을 선택하며, attack/release와 noise gate로 떨림을 줄입니다.</p>
           </section>
-
-          <section class="control-section toggles">
-            <label><input id="lipSyncTest" type="checkbox" /> Auto lip-sync test</label>
-            <label><input id="autoBlink" type="checkbox" checked /> Auto blink</label>
-            <label><input id="breath" type="checkbox" checked /> Breath</label>
-            <label><input id="showParameters" type="checkbox" /> Show parameters</label>
-            <label><input id="showBounds" type="checkbox" /> Show source bounds</label>
-          </section>
-
-          <section class="control-section debug-section">
-            <div class="debug-line"><span>blink level</span><strong id="blinkValue">1.00</strong></div>
-            <pre id="params" hidden>parameter snapshot</pre>
-          </section>
+          <section class="control-section toggles"><label><input id="lipSyncTest" type="checkbox" /> Auto lip-sync test</label><label><input id="autoBlink" type="checkbox" checked /> Auto blink</label><label><input id="breath" type="checkbox" checked /> Breath</label><label><input id="showParameters" type="checkbox" /> Show parameters</label><label><input id="showBounds" type="checkbox" /> Show source bounds</label></section>
+          <section class="control-section debug-section"><div class="debug-line"><span>blink level</span><strong id="blinkValue">1.00</strong></div><pre id="params" hidden>parameter snapshot</pre></section>
           <div class="status" id="status">초기화 중…</div>
         </aside>
       </section>
-
-      <footer>
-        <span>Source: assets/source/ · derived crops: assets/parts/</span>
-        <span>API: setEmotion · setViseme · startMicrophoneLipSync · setAudioFeatures</span>
-      </footer>
+      <footer><span>Source: assets/source/ · derived crops: assets/parts/</span><span>API: setEmotion · setViseme · startMicrophoneLipSync · setAudioFeatures</span></footer>
     </main>
     <script type="module" src="src/avatar/main.js"></script>
   </body>
