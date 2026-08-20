@@ -1,0 +1,27 @@
+name: WebGL Mesh Rig QA
+
+on:
+  push:
+    branches:
+      - feature/webgl-mesh-rig
+      - release/v0.3.0-alpha.2
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Static checks
+        run: npm run check
+      - name: Regression tests
+        run: npm test
