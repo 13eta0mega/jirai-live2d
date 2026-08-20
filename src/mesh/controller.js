@@ -147,7 +147,7 @@ export class MeshAvatarController {
 
   setLipSyncTest(enabled) { this.lipSyncTest = Boolean(enabled); if (enabled) { if (this.lipSyncMode === "microphone") void this.stopMicrophoneLipSync({ preserveMode: true }); this.lipSyncMode = "test"; this.audioFeatures = null; this.lipSyncState = createLipSyncState(); this.audioResult = emptyAudio(); } else if (this.lipSyncMode === "test") { this.lipSyncMode = "manual"; this.mouthTarget = this.manualMouth; this.audioResult = emptyAudio(); } }
   setAudioFeatures(features) { if (this.lipSyncMode === "microphone") void this.stopMicrophoneLipSync({ preserveMode: true }); this.lipSyncTest = false; this.lipSyncMode = "external"; this.lipSyncState = createLipSyncState(); this.audioResult = emptyAudio(); this.audioFeatures = { rms: Math.max(0, Number(features?.rms) || 0), low: Math.max(0, Number(features?.low) || 0), mid: Math.max(0, Number(features?.mid) || 0), high: Math.max(0, Number(features?.high) || 0) }; }
-  clearAudioFeatures() { this.audioFeatures = null; if (this.lipSyncMode === "external") this.lipSyncMode = "manual"; }
+  clearAudioFeatures() { this.audioFeatures = null; if (this.lipSyncMode === "external") { this.lipSyncMode = "manual"; this.lipSyncState = createLipSyncState(); this.audioResult = emptyAudio(); this.mouthTarget = this.manualMouth; } }
 
   async startMicrophoneLipSync() {
     if (!navigator.mediaDevices?.getUserMedia) throw new Error("이 브라우저는 마이크 입력을 지원하지 않습니다.");
