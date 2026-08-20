@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "emotionIds": ["neutral", "happy", "excited", "teasing", "pleading", "relaxed", "sick", "angry", "annoyed", "sad", "surprised", "embarrassed", "scared", "smug", "confused", "love"],
+  "presets": {
+    "neutral": {"source": "jirai_stand.png", "expression": "neutral", "bodyMotion": "idle_breath", "transitionMotion": "face_blend", "effects": [], "loop": true, "priority": 10, "blinkMode": "auto", "breathScale": 1, "lipSyncEnabled": true, "pose": {"x": 0, "y": 0, "rotation": 0, "scale": 1}},
+    "happy": {"source": "jirai_stand.png", "expression": "happy", "bodyMotion": "happy_bob", "transitionMotion": "face_blend", "effects": [], "loop": true, "priority": 30, "blinkMode": "auto", "breathScale": 1.05, "lipSyncEnabled": true, "pose": {"x": 0, "y": -3, "rotation": 0, "scale": 1.02}},
+    "excited": {"source": "jirai_jump.png", "expression": "excited", "bodyMotion": "jump_once", "transitionMotion": "jump_settle", "effects": [], "loop": false, "priority": 40, "blinkMode": "special", "breathScale": 0.8, "lipSyncEnabled": true, "pose": {"x": 0, "y": -10, "rotation": 0, "scale": 1.03}},
+    "teasing": {"source": "jirai_peace.png", "expression": "teasing", "bodyMotion": "pose_forward_hands", "transitionMotion": "limb_blend", "effects": [], "loop": true, "priority": 30, "blinkMode": "special", "breathScale": 0.95, "lipSyncEnabled": true, "pose": {"x": 0, "y": 0, "rotation": -2, "scale": 1}},
+    "pleading": {"source": "jirai_uruuru.png", "expression": "pleading", "bodyMotion": "pleading_idle", "transitionMotion": "limb_blend", "effects": ["sparkle"], "loop": true, "priority": 30, "blinkMode": "special", "breathScale": 0.7, "lipSyncEnabled": true, "pose": {"x": 0, "y": 5, "rotation": 0, "scale": 0.98}},
+    "relaxed": {"source": "jirai_gorogoro.png", "expression": "relaxed", "bodyMotion": "lay_idle", "transitionMotion": "lay_transition", "effects": [], "loop": true, "priority": 50, "blinkMode": "disabled", "breathScale": 0.35, "lipSyncEnabled": true, "pose": {"x": 0, "y": 25, "rotation": -9, "scale": 0.92}},
+    "sick": {"source": "jirai_haku.png", "expression": "sick", "bodyMotion": "sick_recoil", "transitionMotion": "sick_transition", "effects": ["rainbow", "sparkle"], "loop": false, "priority": 50, "blinkMode": "auto", "breathScale": 0.5, "lipSyncEnabled": true, "pose": {"x": 0, "y": 8, "rotation": 0, "scale": 0.98}},
+    "angry": {"source": "jirai_stand.png", "expression": "angry", "bodyMotion": "angry_tense", "transitionMotion": "face_blend", "effects": [], "loop": true, "priority": 30, "blinkMode": "auto", "breathScale": 0.85, "lipSyncEnabled": true, "pose": {"x": 0, "y": 3, "rotation": 1, "scale": 1}},
+    "annoyed": {"source": "jirai_stand.png", "expression": "annoyed", "bodyMotion": "annoyed_shift", "transitionMotion": "face_blend", "effects": [], "loop": true, "priority": 30, "blinkMode": "auto", "breathScale": 0.9, "lipSyncEnabled": true, "pose": {"x": 3, "y": 1, "rotation": -2, "scale": 1}},
+    "sad": {"source": "jirai_uruuru.png", "expression": "sad", "bodyMotion": "sad_sink", "transitionMotion": "face_blend", "effects": ["tears"], "loop": true, "priority": 30, "blinkMode": "special", "breathScale": 0.65, "lipSyncEnabled": true, "pose": {"x": 0, "y": 7, "rotation": 1, "scale": 0.98}},
+    "surprised": {"source": "jirai_haku.png", "expression": "surprised", "bodyMotion": "startle", "transitionMotion": "quick_react", "effects": [], "loop": false, "priority": 40, "blinkMode": "special", "breathScale": 0.8, "lipSyncEnabled": true, "pose": {"x": 0, "y": -2, "rotation": -1, "scale": 1}},
+    "embarrassed": {"source": "jirai_stand.png", "expression": "embarrassed", "bodyMotion": "shy_shift", "transitionMotion": "face_blend", "effects": [], "loop": true, "priority": 30, "blinkMode": "auto", "breathScale": 0.9, "lipSyncEnabled": true, "pose": {"x": -2, "y": 3, "rotation": 2, "scale": 1}},
+    "scared": {"source": "jirai_haku.png", "expression": "scared", "bodyMotion": "scared_shiver", "transitionMotion": "quick_react", "effects": [], "loop": true, "priority": 30, "blinkMode": "special", "breathScale": 0.8, "lipSyncEnabled": true, "pose": {"x": 0, "y": 2, "rotation": -1, "scale": 1.01}},
+    "smug": {"source": "jirai_peace.png", "expression": "smug", "bodyMotion": "smug_hold", "transitionMotion": "limb_blend", "effects": [], "loop": true, "priority": 30, "blinkMode": "special", "breathScale": 0.9, "lipSyncEnabled": true, "pose": {"x": 2, "y": -2, "rotation": -2, "scale": 1}},
+    "confused": {"source": "jirai_stand.png", "expression": "confused", "bodyMotion": "confused_tilt", "transitionMotion": "face_blend", "effects": [], "loop": true, "priority": 30, "blinkMode": "auto", "breathScale": 0.9, "lipSyncEnabled": true, "pose": {"x": 0, "y": 1, "rotation": 5, "scale": 1}},
+    "love": {"source": "jirai_jump.png", "expression": "love", "bodyMotion": "love_bob", "transitionMotion": "jump_settle", "effects": [], "loop": true, "priority": 30, "blinkMode": "auto", "breathScale": 1.05, "lipSyncEnabled": true, "pose": {"x": 0, "y": -5, "rotation": 0, "scale": 1.02}}
+  },
+  "ownership": {
+    "expression": ["ParamAngleX", "ParamAngleY", "ParamAngleZ", "ParamEyeLSmile", "ParamEyeRSmile", "ParamEyeBallX", "ParamEyeBallY", "ParamBrowLY", "ParamBrowRY", "ParamBrowLAngle", "ParamBrowRAngle", "ParamBrowLForm", "ParamBrowRForm", "ParamMouthForm", "ParamCheek"],
+    "lipSync": ["ParamMouthOpenY"],
+    "eyeBlink": ["ParamEyeLOpen", "ParamEyeROpen"],
+    "breathSecondary": ["ParamBreath", "ParamBodyAngleY", "ParamTwinTailL", "ParamTwinTailR"]
+  }
+}
+

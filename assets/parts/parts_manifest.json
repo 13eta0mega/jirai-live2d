@@ -1,0 +1,244 @@
+{
+  "parts": [
+    {
+      "id": "eye_open_l",
+      "source": "jirai_haku.png",
+      "source_box": [
+        70,
+        96,
+        104,
+        131
+      ],
+      "output": "eyes/eye_open_l.png",
+      "kind": "eye",
+      "manual_cleanup": true,
+      "underpaint_required": false,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "eye_open_r",
+      "source": "jirai_haku.png",
+      "source_box": [
+        122,
+        96,
+        154,
+        131
+      ],
+      "output": "eyes/eye_open_r.png",
+      "kind": "eye",
+      "manual_cleanup": true,
+      "underpaint_required": false,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "eye_closed_l",
+      "source": "jirai_stand.png",
+      "source_box": [
+        90,
+        103,
+        117,
+        123
+      ],
+      "output": "eyes/eye_closed_l.png",
+      "kind": "eye",
+      "manual_cleanup": true,
+      "underpaint_required": false,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "eye_closed_r",
+      "source": "jirai_stand.png",
+      "source_box": [
+        145,
+        103,
+        172,
+        123
+      ],
+      "output": "eyes/eye_closed_r.png",
+      "kind": "eye",
+      "manual_cleanup": true,
+      "underpaint_required": false,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "eye_wink_r",
+      "source": "jirai_peace.png",
+      "source_box": [
+        147,
+        103,
+        174,
+        123
+      ],
+      "output": "eyes/eye_wink_r.png",
+      "kind": "eye",
+      "manual_cleanup": true,
+      "underpaint_required": false,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "eye_uruuru_l",
+      "source": "jirai_uruuru.png",
+      "source_box": [
+        78,
+        92,
+        119,
+        137
+      ],
+      "output": "eyes/eye_uruuru_l.png",
+      "kind": "eye",
+      "manual_cleanup": true,
+      "underpaint_required": false,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "eye_uruuru_r",
+      "source": "jirai_uruuru.png",
+      "source_box": [
+        151,
+        92,
+        192,
+        137
+      ],
+      "output": "eyes/eye_uruuru_r.png",
+      "kind": "eye",
+      "manual_cleanup": true,
+      "underpaint_required": false,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "mouth_closed",
+      "source": "jirai_stand.png",
+      "source_box": [
+        112,
+        116,
+        145,
+        141
+      ],
+      "output": "mouth/mouth_closed.png",
+      "kind": "mouth",
+      "manual_cleanup": true,
+      "underpaint_required": false,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "mouth_small",
+      "source": "jirai_peace.png",
+      "source_box": [
+        110,
+        115,
+        142,
+        145
+      ],
+      "output": "mouth/mouth_small.png",
+      "kind": "mouth",
+      "manual_cleanup": true,
+      "underpaint_required": false,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "mouth_a",
+      "source": "jirai_jump.png",
+      "source_box": [
+        130,
+        144,
+        165,
+        179
+      ],
+      "output": "mouth/mouth_a.png",
+      "kind": "mouth",
+      "manual_cleanup": true,
+      "underpaint_required": false,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "mouth_wide",
+      "source": "jirai_jump.png",
+      "source_box": [
+        126,
+        140,
+        170,
+        180
+      ],
+      "output": "mouth/mouth_wide.png",
+      "kind": "mouth",
+      "manual_cleanup": true,
+      "underpaint_required": false,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "mouth_uruuru",
+      "source": "jirai_uruuru.png",
+      "source_box": [
+        118,
+        120,
+        149,
+        141
+      ],
+      "output": "mouth/mouth_uruuru.png",
+      "kind": "mouth",
+      "manual_cleanup": true,
+      "underpaint_required": false,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "torso_stand",
+      "source": "jirai_stand.png",
+      "source_box": [
+        73,
+        150,
+        190,
+        254
+      ],
+      "output": "body/torso_stand.png",
+      "kind": "body",
+      "manual_cleanup": false,
+      "underpaint_required": true,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "arms_jump",
+      "source": "jirai_jump.png",
+      "source_box": [
+        34,
+        128,
+        278,
+        235
+      ],
+      "output": "arms/arms_jump.png",
+      "kind": "arms",
+      "manual_cleanup": false,
+      "underpaint_required": true,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "legs_stand",
+      "source": "jirai_stand.png",
+      "source_box": [
+        84,
+        210,
+        176,
+        257
+      ],
+      "output": "legs/legs_stand.png",
+      "kind": "legs",
+      "manual_cleanup": false,
+      "underpaint_required": true,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    },
+    {
+      "id": "rainbow_haku",
+      "source": "jirai_haku.png",
+      "source_box": [
+        75,
+        120,
+        184,
+        226
+      ],
+      "output": "effects/rainbow_haku.png",
+      "kind": "effect",
+      "manual_cleanup": false,
+      "underpaint_required": false,
+      "notes": "Source-derived crop; validate mask and paint overscan in Cubism before production export."
+    }
+  ]
+}

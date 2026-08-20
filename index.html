@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Jirai 2D Avatar · Raster Live2D 준비 런타임</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">ORIGINAL PNG PRESERVED · LIVE2D PREP</p>
+          <h1>Jirai 2D Avatar</h1>
+          <p class="sub">원본 래스터 파츠를 보존한 감정·호흡·눈깜빡임·립싱크 검증 화면</p>
+        </div>
+        <div class="status-pill" id="fpsValue">-- FPS</div>
+      </header>
+
+      <section class="workspace">
+        <div class="stage-card">
+          <div class="stage-topline">
+            <span>현재 감정</span>
+            <strong id="emotionNow">불러오는 중…</strong>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="avatarCanvas" aria-label="Jirai 아바타 미리보기"></canvas>
+          </div>
+          <div class="stage-note">※ `.cmo3/.moc3`를 가장하지 않고, 제공된 PNG 기반 래스터 전환을 검증합니다.</div>
+        </div>
+
+        <aside class="controls-card">
+          <section class="control-section">
+            <div class="section-title">감정 16종</div>
+            <div class="emotion-grid" id="emotionButtons"></div>
+            <div class="button-row">
+              <button class="secondary" id="cycleButton" type="button">16종 순환</button>
+              <button class="secondary" id="qaButton" type="button">전환 QA</button>
+              <button class="secondary" id="resetButton" type="button">초기화</button>
+            </div>
+          </section>
+
+          <section class="control-section">
+            <div class="section-title">입 / 립싱크</div>
+            <label class="range-label" for="mouthSlider"><span>MouthOpenY</span><output id="mouthValue">0.00</output></label>
+            <input id="mouthSlider" type="range" min="0" max="1" step="0.01" value="0" />
+            <p class="hint">현재 TTS는 연결하지 않았습니다. 아래 테스트 파형 또는 향후 viseme 입력을 연결할 수 있습니다.</p>
+          </section>
+
+          <section class="control-section toggles">
+            <label><input id="lipSyncTest" type="checkbox" /> Auto lip-sync test</label>
+            <label><input id="autoBlink" type="checkbox" checked /> Auto blink</label>
+            <label><input id="breath" type="checkbox" checked /> Breath</label>
+            <label><input id="showParameters" type="checkbox" /> Show parameters</label>
+            <label><input id="showBounds" type="checkbox" /> Show ArtMesh bounds</label>
+          </section>
+
+          <section class="control-section debug-section">
+            <div class="debug-line"><span>blink level</span><strong id="blinkValue">1.00</strong></div>
+            <pre id="params">parameter snapshot</pre>
+          </section>
+
+          <div class="status" id="status">초기화 중…</div>
+        </aside>
+      </section>
+
+      <footer>
+        <span>Source: `assets/source/` · derived crops: `assets/parts/`</span>
+        <span>Runtime API: setEmotion · setMouthOpen · setViseme · setLipSyncTest</span>
+      </footer>
+    </main>
+    <script type="module" src="src/avatar/main.js"></script>
+  </body>
+</html>
+

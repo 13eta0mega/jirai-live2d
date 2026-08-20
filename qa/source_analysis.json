@@ -1,0 +1,202 @@
+{
+  "sources": [
+    {
+      "file": "jirai_stand.png",
+      "size": {
+        "width": 259,
+        "height": 270
+      },
+      "mode": "RGBA",
+      "alpha_bbox": [
+        39,
+        11,
+        218,
+        252
+      ],
+      "alpha_bbox_size": {
+        "width": 179,
+        "height": 241
+      },
+      "alpha_center": [
+        127.98,
+        112.1
+      ],
+      "alpha_center_normalized": [
+        0.4941,
+        0.4152
+      ],
+      "alpha": {
+        "nonzero_pixels": 25406,
+        "opaque_pixels": 23652,
+        "coverage": 0.363306,
+        "mean_alpha": 0.351035
+      },
+      "source_sha256": "4fb752db26e69d92bf7757fa499b1b89178eb5018125d6fad8424abf2a90b13d"
+    },
+    {
+      "file": "jirai_jump.png",
+      "size": {
+        "width": 300,
+        "height": 273
+      },
+      "mode": "RGBA",
+      "alpha_bbox": [
+        35,
+        14,
+        278,
+        248
+      ],
+      "alpha_bbox_size": {
+        "width": 243,
+        "height": 234
+      },
+      "alpha_center": [
+        148.57,
+        141.53
+      ],
+      "alpha_center_normalized": [
+        0.4952,
+        0.5184
+      ],
+      "alpha": {
+        "nonzero_pixels": 27136,
+        "opaque_pixels": 25327,
+        "coverage": 0.331331,
+        "mean_alpha": 0.320299
+      },
+      "source_sha256": "dd22b41becd30b463fcc2180d45425c076bdde6393c69cbc7950bed3f06cf3dc"
+    },
+    {
+      "file": "jirai_peace.png",
+      "size": {
+        "width": 259,
+        "height": 270
+      },
+      "mode": "RGBA",
+      "alpha_bbox": [
+        32,
+        17,
+        225,
+        255
+      ],
+      "alpha_bbox_size": {
+        "width": 193,
+        "height": 238
+      },
+      "alpha_center": [
+        126.88,
+        117.93
+      ],
+      "alpha_center_normalized": [
+        0.4899,
+        0.4368
+      ],
+      "alpha": {
+        "nonzero_pixels": 26763,
+        "opaque_pixels": 24942,
+        "coverage": 0.382711,
+        "mean_alpha": 0.369593
+      },
+      "source_sha256": "db23293188bf6fbebb6f6b855f3bc017f64ed297bd310d98562e0d808ad946b6"
+    },
+    {
+      "file": "jirai_uruuru.png",
+      "size": {
+        "width": 270,
+        "height": 246
+      },
+      "mode": "RGBA",
+      "alpha_bbox": [
+        41,
+        18,
+        226,
+        222
+      ],
+      "alpha_bbox_size": {
+        "width": 185,
+        "height": 204
+      },
+      "alpha_center": [
+        133.11,
+        108.04
+      ],
+      "alpha_center_normalized": [
+        0.493,
+        0.4392
+      ],
+      "alpha": {
+        "nonzero_pixels": 23777,
+        "opaque_pixels": 22391,
+        "coverage": 0.35798,
+        "mean_alpha": 0.347573
+      },
+      "source_sha256": "0607644ff3a952d8e81ff7d75fd7818d8ab0096961d7ceb6b38aaa4e976d5dd6"
+    },
+    {
+      "file": "jirai_gorogoro.png",
+      "size": {
+        "width": 270,
+        "height": 246
+      },
+      "mode": "RGBA",
+      "alpha_bbox": [
+        7,
+        22,
+        254,
+        205
+      ],
+      "alpha_bbox_size": {
+        "width": 247,
+        "height": 183
+      },
+      "alpha_center": [
+        142.4,
+        118.05
+      ],
+      "alpha_center_normalized": [
+        0.5274,
+        0.4799
+      ],
+      "alpha": {
+        "nonzero_pixels": 27641,
+        "opaque_pixels": 26199,
+        "coverage": 0.416155,
+        "mean_alpha": 0.40524
+      },
+      "source_sha256": "bd51eb2e42e4cf2f71c2421ad22257e4389f7e682f0497a997b8f4517aeea7b5"
+    },
+    {
+      "file": "jirai_haku.png",
+      "size": {
+        "width": 250,
+        "height": 246
+      },
+      "mode": "RGBA",
+      "alpha_bbox": [
+        27,
+        13,
+        210,
+        229
+      ],
+      "alpha_bbox_size": {
+        "width": 183,
+        "height": 216
+      },
+      "alpha_center": [
+        118.63,
+        111.82
+      ],
+      "alpha_center_normalized": [
+        0.4745,
+        0.4546
+      ],
+      "alpha": {
+        "nonzero_pixels": 26537,
+        "opaque_pixels": 25083,
+        "coverage": 0.431496,
+        "mean_alpha": 0.41957
+      },
+      "source_sha256": "0217b1ecb9162a3a1213662b095be5aa2a6ce58f93fea71792d6f65193d6bbeb"
+    }
+  ]
+}

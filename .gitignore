@@ -1,0 +1,9 @@
+# Generated/intermediate folders kept outside the source tree.
+/work/
+/outputs/jirai-live2d-runtime/
+
+# Local tooling and OS metadata.
+node_modules/
+Thumbs.db
+.DS_Store
+

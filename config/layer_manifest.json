@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "sourcePolicy": {
+    "originalsReadOnly": true,
+    "vectorization": false,
+    "aiGeneration": false,
+    "note": "All runtime visuals are sourced from assets/source or conservative crops in assets/parts."
+  },
+  "root": [
+    {
+      "name": "Hair_Back",
+      "children": ["Hair_Back_Main", "TwinTail_L", "TwinTail_R", "HairClip_L", "HairClip_R"],
+      "ownership": ["ParamAngleX", "ParamAngleY", "ParamTwinTailL", "ParamTwinTailR"]
+    },
+    {
+      "name": "Body",
+      "children": ["Neck", "Torso", "Dress_Front", "Dress_Skirt", "Collar", "Chest_Heart"],
+      "ownership": ["ParamBodyAngleX", "ParamBodyAngleY", "ParamBodyAngleZ", "ParamBreath"]
+    },
+    {
+      "name": "Head",
+      "children": [
+        "Face", "Ear_L", "Ear_R", "Brow_L", "Brow_R", "Eye_L_Normal", "Eye_R_Normal",
+        "Eye_L_Smile", "Eye_R_Smile", "Eye_L_Uruuru", "Eye_R_Uruuru", "Eye_L_Wink",
+        "Eye_R_Wink", "Nose", "Mouth_Base", "Mouth_A", "Mouth_I", "Mouth_U", "Mouth_E",
+        "Mouth_O", "Mouth_Smile", "Mouth_Sick"
+      ],
+      "ownership": [
+        "ParamAngleX", "ParamAngleY", "ParamAngleZ", "ParamEyeLOpen", "ParamEyeROpen",
+        "ParamEyeLSmile", "ParamEyeRSmile", "ParamEyeBallX", "ParamEyeBallY",
+        "ParamBrowLY", "ParamBrowRY", "ParamBrowLAngle", "ParamBrowRAngle",
+        "ParamBrowLForm", "ParamBrowRForm", "ParamMouthOpenY", "ParamMouthForm", "ParamCheek"
+      ]
+    },
+    {
+      "name": "Hair_Front",
+      "children": ["Bangs_Main", "SideHair_L", "SideHair_R"],
+      "ownership": ["ParamAngleX", "ParamAngleY", "ParamAngleZ"]
+    },
+    {"name": "Arm_L", "children": ["Upper", "Lower", "Hand"], "ownership": ["ParamArmLA", "ParamArmLB", "ParamHandL"]},
+    {"name": "Arm_R", "children": ["Upper", "Lower", "Hand"], "ownership": ["ParamArmRA", "ParamArmRB", "ParamHandR"]},
+    {"name": "Leg_L", "children": ["Thigh", "Calf", "Stocking", "Shoe"], "ownership": ["ParamLegLA", "ParamLegLB"]},
+    {"name": "Leg_R", "children": ["Thigh", "Calf", "Stocking", "Shoe"], "ownership": ["ParamLegRA", "ParamLegRB"]},
+    {"name": "Effects", "children": ["Tears", "Sparkle", "Rainbow"], "ownership": ["EffectOpacity"]}
+  ],
+  "runtimeAttachments": {
+    "neutral": "assets/source/jirai_stand.png",
+    "jump": "assets/source/jirai_jump.png",
+    "peace": "assets/source/jirai_peace.png",
+    "uruuru": "assets/source/jirai_uruuru.png",
+    "gorogoro": "assets/source/jirai_gorogoro.png",
+    "haku": "assets/source/jirai_haku.png"
+  },
+  "referenceParts": "assets/parts/parts_manifest.json",
+  "manualArtMeshRequired": [
+    "Face", "Bangs_Main", "TwinTail_L", "TwinTail_R", "Eye_L_Normal", "Eye_R_Normal",
+    "Eye_L_Uruuru", "Eye_R_Uruuru", "Mouth_Base", "Mouth_A", "Mouth_I", "Mouth_U",
+    "Mouth_E", "Mouth_O", "Arm_L", "Arm_R", "Leg_L", "Leg_R", "Dress_Skirt"
+  ]
+}
+

@@ -1,0 +1,38 @@
+{
+  "ok": true,
+  "source_checks": [
+    {
+      "file": "jirai_stand.png",
+      "ok": true,
+      "detail": "259x270 RGBA sha256=ok"
+    },
+    {
+      "file": "jirai_jump.png",
+      "ok": true,
+      "detail": "300x273 RGBA sha256=ok"
+    },
+    {
+      "file": "jirai_peace.png",
+      "ok": true,
+      "detail": "259x270 RGBA sha256=ok"
+    },
+    {
+      "file": "jirai_uruuru.png",
+      "ok": true,
+      "detail": "270x246 RGBA sha256=ok"
+    },
+    {
+      "file": "jirai_gorogoro.png",
+      "ok": true,
+      "detail": "270x246 RGBA sha256=ok"
+    },
+    {
+      "file": "jirai_haku.png",
+      "ok": true,
+      "detail": "250x246 RGBA sha256=ok"
+    }
+  ],
+  "forbidden_svg_files": [],
+  "unverified_cubism_files": [],
+  "note": "Cubism files are intentionally absent until manual Cubism Editor mesh/underpaint QA is complete."
+}
