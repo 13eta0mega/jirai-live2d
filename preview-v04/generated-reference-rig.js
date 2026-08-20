@@ -5,18 +5,20 @@ const smoothstep = (a, b, value) => {
 };
 
 export const GENERATED_REFERENCE_FILES = {
-  neutral: 'assets/reference/v0.4/neutral.webp',
-  happy: 'assets/reference/v0.4/happy.webp',
-  excited: 'assets/reference/v0.4/excited.webp',
-  angry: 'assets/reference/v0.4/angry.webp',
-  embarrassed: 'assets/reference/v0.4/embarrassed.webp',
-  sad: 'assets/reference/v0.4/sad.webp',
-  surprised: 'assets/reference/v0.4/surprised.webp',
-  scared: 'assets/reference/v0.4/scared.webp',
-  teasing: 'assets/reference/v0.4/teasing.webp',
-  love: 'assets/reference/v0.4/love.webp',
+  neutral: 'assets/reference/v0.4/neutral.webp.b64',
+  happy: 'assets/reference/v0.4/happy.webp.b64',
+  excited: 'assets/reference/v0.4/excited.webp.b64',
+  angry: 'assets/reference/v0.4/angry.webp.b64',
+  embarrassed: 'assets/reference/v0.4/embarrassed.webp.b64',
+  sad: 'assets/reference/v0.4/sad.webp.b64',
+  surprised: 'assets/reference/v0.4/surprised.webp.b64',
+  scared: 'assets/reference/v0.4/scared.webp.b64',
+  teasing: 'assets/reference/v0.4/teasing.webp.b64',
+  love: 'assets/reference/v0.4/love.webp.b64',
 };
 
+// Normalized to the generated 1086x1448 reference canvas. These are deliberately
+// emotion-specific: lip-sync never reuses a single global mouth anchor.
 export const GENERATED_REFERENCE_MOUTH_RECTS = {
   neutral: [0.486188, 0.136740, 0.032228, 0.013812],
   happy: [0.469613, 0.129834, 0.050645, 0.027624],
@@ -64,6 +66,8 @@ export function resolveGeneratedMouthRect(emotion, viseme = 'CLOSED', open = 0) 
 
 export function hybridReferenceWeights(progress, hasFrom, hasTo) {
   const p = clamp01(progress);
+  // Keep endpoint art fully intact, then expose the articulated renderer for the
+  // central motion arc. The narrow overlap zones hide texture handoff seams.
   const from = hasFrom ? 1 - smoothstep(0.08, 0.30, p) : 0;
   const to = hasTo ? smoothstep(0.70, 0.92, p) : 0;
   return { from, to, articulated: clamp01(1 - Math.max(from, to)) };
@@ -97,6 +101,8 @@ export function buildGeneratedMouthCover(image, emotion) {
   if (!canvas || !sample) return null;
   const sctx = sample.getContext('2d', { willReadFrequently: true });
   sctx.drawImage(image, 0, 0, width, height);
+  // Sample a skin-only band immediately above the mouth. Median-like rejection
+  // keeps hair, finger, line art and blush from contaminating the cover.
   const sx = Math.max(0, x - padX);
   const sy = Math.max(0, y - Math.max(5, h));
   const sw = Math.min(width - sx, outW);
@@ -119,6 +125,7 @@ export function buildGeneratedMouthCover(image, emotion) {
   grad.addColorStop(0, `rgba(${Math.min(255,r+3)},${Math.min(255,g+3)},${Math.min(255,b+3)},1)`);
   grad.addColorStop(1, `rgba(${r},${g},${b},1)`);
   ctx.fillStyle = grad; ctx.fillRect(0, 0, outW, outH);
+  // Feather all four edges so the patch cannot read as a rectangle.
   ctx.globalCompositeOperation = 'destination-in';
   const edge = Math.max(2, Math.min(padX, padY));
   const alpha = ctx.createRadialGradient(outW/2,outH/2,Math.max(1,Math.min(outW,outH)/2-edge),outW/2,outH/2,Math.max(outW,outH)/1.35);
@@ -126,7 +133,12 @@ export function buildGeneratedMouthCover(image, emotion) {
   ctx.fillStyle = alpha; ctx.fillRect(0,0,outW,outH); ctx.globalCompositeOperation = 'source-over';
   return {
     image: canvas,
-    rect: [(x - padX) / width, (y - padY) / height, outW / width, outH / height],
+    rect: [
+      (x - padX) / width,
+      (y - padY) / height,
+      outW / width,
+      outH / height,
+    ],
   };
 }
 
