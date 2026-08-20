@@ -1,11 +1,11 @@
 {
   "name": "jirai-raster-live2d-runtime",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node tools/serve.mjs",
-    "check": "node --check src/avatar/data.js && node --check src/avatar/controller.js && node --check src/avatar/main.js && node --check tools/serve.mjs",
-    "test": "node tools/test_config.mjs"
+    "check": "node --check src/avatar/data.js && node --check src/avatar/lipsync.js && node --check src/avatar/controller.js && node --check src/avatar/main.js && node --check tools/serve.mjs",
+    "test": "node tools/test_config.mjs && node tools/test_lipsync.mjs && node tools/test_controller.mjs"
   }
 }
-

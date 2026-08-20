@@ -20,6 +20,7 @@ export const PART_FILES = {
   mouthA: "assets/parts/mouth/mouth_a.png",
   mouthWide: "assets/parts/mouth/mouth_wide.png",
   mouthUruuru: "assets/parts/mouth/mouth_uruuru.png",
+  rainbow: "assets/parts/effects/rainbow_haku.png",
 };
 
 const pose = (source, expression, bodyMotion, options = {}) => ({
@@ -38,9 +39,9 @@ const pose = (source, expression, bodyMotion, options = {}) => ({
 
 export const FALLBACK_PRESETS = {
   neutral: pose("stand", "neutral", "idle_breath", { priority: 10 }),
-  happy: pose("stand", "happy", "happy_bob", { pose: { x: 0, y: -3, rotation: 0, scale: 1.02 } }),
-  excited: pose("jump", "excited", "jump_once", { transitionMotion: "jump_settle", loop: false, priority: 40, blinkMode: "special", pose: { x: 0, y: -10, rotation: 0, scale: 1.03 } }),
-  teasing: pose("peace", "teasing", "pose_forward_hands", { transitionMotion: "limb_blend", blinkMode: "special", pose: { x: 0, y: 0, rotation: -2, scale: 1 } }),
+  happy: pose("stand", "happy", "happy_bob", { breathScale: 1.05, pose: { x: 0, y: -3, rotation: 0, scale: 1.02 } }),
+  excited: pose("jump", "excited", "jump_once", { transitionMotion: "jump_settle", loop: false, priority: 40, blinkMode: "special", breathScale: 0.8, pose: { x: 0, y: -10, rotation: 0, scale: 1.03 } }),
+  teasing: pose("peace", "teasing", "pose_forward_hands", { transitionMotion: "limb_blend", blinkMode: "special", breathScale: 0.95, pose: { x: 0, y: 0, rotation: -2, scale: 1 } }),
   pleading: pose("uruuru", "pleading", "pleading_idle", { transitionMotion: "limb_blend", effects: ["sparkle"], blinkMode: "special", breathScale: 0.7, pose: { x: 0, y: 5, rotation: 0, scale: 0.98 } }),
   relaxed: pose("gorogoro", "relaxed", "lay_idle", { transitionMotion: "lay_transition", priority: 50, blinkMode: "disabled", breathScale: 0.35, pose: { x: 0, y: 25, rotation: -9, scale: 0.92 } }),
   sick: pose("haku", "sick", "sick_recoil", { transitionMotion: "sick_transition", effects: ["rainbow", "sparkle"], loop: false, priority: 50, breathScale: 0.5, pose: { x: 0, y: 8, rotation: 0, scale: 0.98 } }),
@@ -49,7 +50,7 @@ export const FALLBACK_PRESETS = {
   sad: pose("uruuru", "sad", "sad_sink", { transitionMotion: "face_blend", effects: ["tears"], blinkMode: "special", breathScale: 0.65, pose: { x: 0, y: 7, rotation: 1, scale: 0.98 } }),
   surprised: pose("haku", "surprised", "startle", { transitionMotion: "quick_react", loop: false, priority: 40, blinkMode: "special", breathScale: 0.8, pose: { x: 0, y: -2, rotation: -1, scale: 1 } }),
   embarrassed: pose("stand", "embarrassed", "shy_shift", { breathScale: 0.9, pose: { x: -2, y: 3, rotation: 2, scale: 1 } }),
-  scared: pose("haku", "scared", "scared_shiver", { transitionMotion: "quick_react", blinkMode: "special", pose: { x: 0, y: 2, rotation: -1, scale: 1.01 } }),
+  scared: pose("haku", "scared", "scared_shiver", { transitionMotion: "quick_react", blinkMode: "special", breathScale: 0.8, pose: { x: 0, y: 2, rotation: -1, scale: 1.01 } }),
   smug: pose("peace", "smug", "smug_hold", { transitionMotion: "limb_blend", blinkMode: "special", breathScale: 0.9, pose: { x: 2, y: -2, rotation: -2, scale: 1 } }),
   confused: pose("stand", "confused", "confused_tilt", { breathScale: 0.9, pose: { x: 0, y: 1, rotation: 5, scale: 1 } }),
   love: pose("jump", "love", "love_bob", { transitionMotion: "jump_settle", breathScale: 1.05, pose: { x: 0, y: -5, rotation: 0, scale: 1.02 } }),
@@ -82,4 +83,3 @@ export const VISEMES = {
   E: { mouthOpen: 0.45, mouthForm: 0.12, mouthPart: "mouthSmall" },
   O: { mouthOpen: 0.72, mouthForm: -0.08, mouthPart: "mouthWide" },
 };
-
