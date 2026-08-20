@@ -3,16 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Jirai 2D Avatar · WebGL Mesh Rig Alpha</title>
+    <title>Jirai 2D Avatar · WebGL Mesh Rig Alpha 2</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="shell">
       <header class="hero">
         <div>
-          <p class="eyebrow">WEBGL MESH RIG · v0.3.0-alpha.1</p>
+          <p class="eyebrow">WEBGL MESH RIG · v0.3.0-alpha.2</p>
           <h1>Jirai 2D Avatar</h1>
-          <p class="sub">regional mesh deformation · spring physics · viseme lip-sync · Canvas fallback</p>
+          <p class="sub">upright texture mapping · interpolated pose transitions · spring physics · viseme lip-sync</p>
         </div>
         <div class="status-pill" id="fpsValue">-- FPS</div>
       </header>
@@ -20,12 +20,12 @@
         <div class="stage-card">
           <div class="stage-topline"><span>현재 감정</span><strong id="emotionNow">불러오는 중…</strong></div>
           <div class="canvas-wrap"><canvas id="avatarCanvas" aria-label="Jirai WebGL mesh avatar preview"></canvas></div>
-          <div class="stage-note">실험 브랜치: 기존 투명 PNG를 24×28 mesh로 변형합니다. Show mesh를 켜면 실제 deformation grid를 확인할 수 있습니다. WebGL이 없으면 기존 Canvas 런타임으로 자동 fallback합니다.</div>
+          <div class="stage-note">v0.3.0-alpha.2: 상하 반전/얼굴 파츠 좌표 오류를 수정하고, 같은 포즈는 파라미터를 직접 보간하며 다른 포즈는 단일 mesh의 중간 동작 + texture hand-off로 전환합니다. Show mesh에서 실제 중간 프레임 변형을 확인할 수 있습니다.</div>
         </div>
         <aside class="controls-card">
           <section class="control-section">
             <div class="section-title">감정 16종</div><div class="emotion-grid" id="emotionButtons"></div>
-            <div class="button-row"><button class="secondary" id="cycleButton" type="button">16종 순환</button><button class="secondary" id="qaButton" type="button">Mesh QA</button><button class="secondary" id="resetButton" type="button">초기화</button></div>
+            <div class="button-row"><button class="secondary" id="cycleButton" type="button">16종 순환</button><button class="secondary" id="qaButton" type="button">엄격 전환 QA</button><button class="secondary" id="resetButton" type="button">초기화</button></div>
           </section>
           <section class="control-section">
             <div class="section-title">입 / 립싱크</div>
@@ -40,7 +40,7 @@
           <div class="status" id="status">초기화 중…</div>
         </aside>
       </section>
-      <footer><span>Stable raster: release/v0.2.1-raster</span><span>Experimental engine: feature/webgl-mesh-rig</span></footer>
+      <footer><span>Stable raster: release/v0.2.1-raster</span><span>WebGL release candidate: v0.3.0-alpha.2</span></footer>
     </main>
     <script type="module" src="src/mesh/main.js"></script>
   </body>
