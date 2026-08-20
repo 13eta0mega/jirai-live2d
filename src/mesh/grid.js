@@ -17,8 +17,8 @@ export function createGrid(columns = 24, rows = 28) {
       const v = y / rws;
       positions[p] = u * 2 - 1;
       uvs[p++] = u;
-      positions[p] = v * 2 - 1;
-      uvs[p++] = v;
+      positions[p] = v * 2 - 1; // top=-1, bottom=+1 in image space
+      uvs[p++] = v;             // UV uses the same top-origin convention
     }
   }
 
@@ -52,7 +52,7 @@ export function createGrid(columns = 24, rows = 28) {
   return { columns: cols, rows: rws, positions, uvs, triangles, lines };
 }
 
-export function deformPoint(x, y, parameters = {}, secondary = {}) {
+export function deformPoint(x, y, parameters = {}, secondary = {}, transitionWarp = {}) {
   const angleX = clamp(parameters.ParamAngleX, -30, 30) / 30;
   const angleY = clamp(parameters.ParamAngleY, -30, 30) / 30;
   const angleZ = clamp(parameters.ParamAngleZ, -30, 30) * Math.PI / 180;
@@ -70,6 +70,13 @@ export function deformPoint(x, y, parameters = {}, secondary = {}) {
   const rightSide = smoothstep(0.12, 0.92, x) * (1 - smoothstep(0.5, 1, y));
   const faceCore = (1 - smoothstep(0.34, 0.72, Math.abs(x))) * (1 - smoothstep(0.12, 0.58, Math.abs(y + 0.18)));
   const mouthZone = (1 - smoothstep(0.08, 0.42, Math.abs(x))) * (1 - smoothstep(0.035, 0.24, Math.abs(y + 0.12)));
+
+  // Arm influence targets side regions from shoulder to wrist while keeping the face/torso center stable.
+  const armSide = smoothstep(0.28, 0.58, Math.abs(x));
+  const armTop = smoothstep(-0.48, -0.12, y);
+  const armBottom = 1 - smoothstep(0.54, 0.82, y);
+  const armMask = armSide * armTop * armBottom;
+  const upperBody = 1 - smoothstep(0.55, 0.96, y);
 
   let px = x;
   let py = y;
@@ -106,30 +113,54 @@ export function deformPoint(x, y, parameters = {}, secondary = {}) {
   px += skirt * 0.034 * lower * (0.45 + Math.abs(x) * 0.55);
   px += bodyLag * 0.026 * torso;
 
+  // Transition-only deformation. Endpoints are zero; intermediate frames are real poses, not pure alpha fades.
+  const armLift = Number(transitionWarp.armLift) || 0;
+  const armSpread = Number(transitionWarp.armSpread) || 0;
+  const bodyLift = Number(transitionWarp.bodyLift) || 0;
+  const bodySquash = Number(transitionWarp.bodySquash) || 0;
+  const lean = Number(transitionWarp.lean) || 0;
+  const headLift = Number(transitionWarp.headLift) || 0;
+  px += Math.sign(x || 1) * armSpread * armMask;
+  py -= armLift * armMask * (0.62 + Math.abs(x) * 0.45);
+  py += bodyLift * upperBody;
+  py += headLift * head;
+  px += lean * torso * (y + 0.22);
+  py = -0.10 + (py + 0.10) * (1 + bodySquash * torso);
+
   return [px, py];
 }
 
-export function deformGrid(basePositions, parameters, secondary, out = null) {
+export function deformGrid(basePositions, parameters, secondary, out = null, transitionWarp = {}) {
   const result = out && out.length === basePositions.length ? out : new Float32Array(basePositions.length);
   for (let i = 0; i < basePositions.length; i += 2) {
-    const [x, y] = deformPoint(basePositions[i], basePositions[i + 1], parameters, secondary);
+    const [x, y] = deformPoint(basePositions[i], basePositions[i + 1], parameters, secondary, transitionWarp);
     result[i] = x;
     result[i + 1] = y;
   }
   return result;
 }
 
-export function createDeformedQuad(rect, sourceWidth, sourceHeight, parameters, secondary) {
+export function createDeformedQuad(rect, sourceWidth, sourceHeight, parameters, secondary, transitionWarp = {}) {
   const [x, y, width, height] = rect;
-  const x0 = (x / sourceWidth) * 2;
-  const x1 = ((x + width) / sourceWidth) * 2;
-  const y0 = (y / sourceHeight) * 2;
-  const y1 = ((y + height) / sourceHeight) * 2;
+  return createDeformedQuadNormalized(
+    [(x / sourceWidth) * 2, (y / sourceHeight) * 2, (width / sourceWidth) * 2, (height / sourceHeight) * 2],
+    parameters,
+    secondary,
+    transitionWarp,
+  );
+}
+
+export function createDeformedQuadNormalized(rect, parameters, secondary, transitionWarp = {}) {
+  const [x, y, width, height] = rect;
+  const x0 = x;
+  const x1 = x + width;
+  const y0 = y;
+  const y1 = y + height;
   const corners = [
-    deformPoint(x0, y0, parameters, secondary),
-    deformPoint(x1, y0, parameters, secondary),
-    deformPoint(x0, y1, parameters, secondary),
-    deformPoint(x1, y1, parameters, secondary),
+    deformPoint(x0, y0, parameters, secondary, transitionWarp),
+    deformPoint(x1, y0, parameters, secondary, transitionWarp),
+    deformPoint(x0, y1, parameters, secondary, transitionWarp),
+    deformPoint(x1, y1, parameters, secondary, transitionWarp),
   ];
   return new Float32Array(corners.flat());
 }
