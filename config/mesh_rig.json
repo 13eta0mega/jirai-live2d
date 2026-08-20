@@ -1,8 +1,15 @@
 {
-  "version": 1,
-  "renderer": "webgl-mesh",
+  "version": 2,
+  "renderer": "webgl-articulated",
   "grid": { "columns": 24, "rows": 28 },
   "fallback": "canvas-raster",
-  "assetStrategy": "flattened-source-now, layered-textures-later",
-  "notes": "The alpha branch deforms the existing transparent source PNG on a regional grid. Future separated PSD/PNG layers can reuse the same parameter and spring system."
+  "assetStrategy": "runtime-extracted-arm-layers + emotion-aware-face-overlays + source-fallback",
+  "articulatedSources": ["stand", "jump", "peace"],
+  "faceRig": {
+    "underpaintSourceFeatures": true,
+    "emotionSpecificAnchors": true,
+    "visemeSafeBounds": true,
+    "expressionChannelTiming": true
+  },
+  "notes": "v0.3.0-alpha.3 splits conservative arm masks from flattened source sprites at runtime, rotates those layers around shoulder pivots, and repaints facial source features before emotion/viseme overlays to prevent double mouths and eyes. Unconfigured source poses retain the original raster fallback path."
 }
