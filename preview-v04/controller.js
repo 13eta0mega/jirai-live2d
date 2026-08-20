@@ -10,6 +10,22 @@ import { stateMethods } from '../src/mesh/controller-state.js';
 import { renderMethods } from '../src/mesh/controller-render.js';
 import { hybridRenderMethods } from './controller-hybrid.js';
 
+async function loadBase64Reference(path) {
+  const response = await fetch(path, { cache: 'no-store' });
+  if (!response.ok) throw new Error(`reference fetch failed: ${path}`);
+  const base64 = (await response.text()).trim();
+  if (!base64) throw new Error(`empty reference: ${path}`);
+  return loadImage(`data:image/webp;base64,${base64}`);
+}
+
+async function loadBase64Optional(entries) {
+  const results = await Promise.all(entries.map(async ([key, path]) => {
+    try { return [key, await loadBase64Reference(path)]; }
+    catch (error) { console.warn(`[mesh-rig] generated reference skipped: ${key}`, error); return null; }
+  }));
+  return Object.fromEntries(results.filter(Boolean));
+}
+
 const withSemanticRigSources = (presets) => ({
   ...presets,
   surprised: presets?.surprised ? { ...presets.surprised, source: 'jump', transitionMotion: 'quick_react', pose: { ...(presets.surprised.pose || {}), y: -4, scale: 1.01 } } : presets?.surprised,
@@ -46,7 +62,7 @@ export class MeshAvatarController {
       try { return [source, buildSourceLayers(image, source)]; }
       catch (error) { console.warn(`[mesh-rig] articulated layer extraction disabled for ${source}`, error); return [source, { body: image, leftArm: null, rightArm: null, covers: {}, articulated: false }]; }
     }));
-    this.generatedReferences = await loadOptional(Object.entries(GENERATED_REFERENCE_FILES));
+    this.generatedReferences = await loadBase64Optional(Object.entries(GENERATED_REFERENCE_FILES));
     this.generatedReferenceCovers = Object.fromEntries(Object.entries(this.generatedReferences).map(([emotion, image]) => {
       try { return [emotion, buildGeneratedMouthCover(image, emotion)]; }
       catch (error) { console.warn(`[mesh-rig] generated mouth cover disabled for ${emotion}`, error); return [emotion, null]; }
