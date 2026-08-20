@@ -13,21 +13,14 @@ const LABELS = {
 };
 
 const SOURCE_KEYS = {
-  "jirai_stand.png": "stand",
-  "jirai_jump.png": "jump",
-  "jirai_peace.png": "peace",
-  "jirai_uruuru.png": "uruuru",
-  "jirai_gorogoro.png": "gorogoro",
-  "jirai_haku.png": "haku",
+  "jirai_stand.png": "stand", "jirai_jump.png": "jump", "jirai_peace.png": "peace",
+  "jirai_uruuru.png": "uruuru", "jirai_gorogoro.png": "gorogoro", "jirai_haku.png": "haku",
 };
 
 function normalizePresets(config) {
   const raw = config?.presets || config;
   if (!raw || typeof raw !== "object") return FALLBACK_PRESETS;
-  return Object.fromEntries(Object.entries(raw).map(([id, preset]) => [
-    id,
-    { ...preset, source: SOURCE_KEYS[preset.source] || preset.source },
-  ]));
+  return Object.fromEntries(Object.entries(raw).map(([id, preset]) => [id, { ...preset, source: SOURCE_KEYS[preset.source] || preset.source }]));
 }
 
 async function loadPresets() {
@@ -40,9 +33,8 @@ async function loadPresets() {
   }
 }
 
-function $(id) {
-  return document.getElementById(id);
-}
+const $ = (id) => document.getElementById(id);
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function makeEmotionButtons(container, onSelect) {
   for (const id of EMOTIONS) {
@@ -57,10 +49,7 @@ function makeEmotionButtons(container, onSelect) {
 }
 
 function formatParams(snapshot) {
-  const keys = [
-    "ParamEyeLOpen", "ParamEyeROpen", "ParamMouthOpenY", "ParamMouthForm", "ParamCheek",
-    "ParamBreath", "ParamAngleZ", "ParamBodyAngleY", "ParamTwinTailL", "ParamTwinTailR",
-  ];
+  const keys = ["ParamEyeLOpen", "ParamEyeROpen", "ParamMouthOpenY", "ParamMouthForm", "ParamCheek", "ParamBreath", "ParamAngleX", "ParamAngleY", "ParamAngleZ", "ParamBodyAngleY"];
   return keys.map((key) => `${key.padEnd(18, " ")} ${Number(snapshot.parameters[key] || 0).toFixed(3)}`).join("\n");
 }
 
@@ -68,13 +57,48 @@ async function main() {
   const presets = await loadPresets();
   const avatar = await createAvatar($("avatarCanvas"), presets);
   const emotionButtons = $("emotionButtons");
-  makeEmotionButtons(emotionButtons, (id) => {
-    avatar.setEmotion(id).catch((error) => setStatus(error.message));
+  const mouth = $("mouthSlider");
+  const micButton = $("microphoneButton");
+  const lipSyncTest = $("lipSyncTest");
+  let micBusy = false;
+
+  makeEmotionButtons(emotionButtons, (id) => avatar.setEmotion(id).catch((error) => setStatus(error.message)));
+  mouth.addEventListener("input", () => avatar.setMouthOpen(Number(mouth.value)));
+  lipSyncTest.addEventListener("change", async (event) => {
+    if (event.target.checked) {
+      await avatar.stopMicrophoneLipSync();
+      micButton.classList.remove("active");
+      micButton.textContent = "마이크 립싱크 시작";
+    }
+    avatar.setLipSyncTest(event.target.checked);
+  });
+  micButton.addEventListener("click", async () => {
+    if (micBusy) return;
+    micBusy = true;
+    micButton.disabled = true;
+    try {
+      const snapshot = avatar.getSnapshot();
+      if (snapshot.lipSyncMode === "microphone") {
+        await avatar.stopMicrophoneLipSync();
+        micButton.classList.remove("active");
+        micButton.textContent = "마이크 립싱크 시작";
+        setStatus("마이크 립싱크를 중지했습니다.");
+      } else {
+        lipSyncTest.checked = false;
+        avatar.setLipSyncTest(false);
+        await avatar.startMicrophoneLipSync();
+        micButton.classList.add("active");
+        micButton.textContent = "마이크 립싱크 중지";
+        setStatus("마이크 입력으로 RMS + 주파수 대역 기반 립싱크를 실행 중입니다.");
+      }
+    } catch (error) {
+      setStatus(`마이크 시작 실패: ${error.message}`);
+    } finally {
+      micBusy = false;
+      micButton.disabled = false;
+    }
   });
 
-  const mouth = $("mouthSlider");
-  mouth.addEventListener("input", () => avatar.setMouthOpen(Number(mouth.value)));
-  $("lipSyncTest").addEventListener("change", (event) => avatar.setLipSyncTest(event.target.checked));
   $("autoBlink").addEventListener("change", (event) => avatar.setBlinkEnabled(event.target.checked));
   $("breath").addEventListener("change", (event) => avatar.setBreathEnabled(event.target.checked));
   $("showParameters").addEventListener("change", (event) => avatar.setDebug({ showParameters: event.target.checked }));
@@ -89,14 +113,18 @@ async function main() {
     $("mouthValue").textContent = snapshot.mouthOpen.toFixed(2);
     $("blinkValue").textContent = snapshot.blinkLevel.toFixed(2);
     $("fpsValue").textContent = `${snapshot.fps} FPS`;
+    $("visemeValue").textContent = snapshot.viseme;
+    $("audioMode").textContent = snapshot.lipSyncMode;
+    $("audioLevel").textContent = Number(snapshot.audio?.rms || 0).toFixed(3);
+    $("audioMeterFill").style.width = `${Math.min(100, Math.max(0, (snapshot.audio?.rms || 0) * 520))}%`;
     $("params").textContent = formatParams(snapshot);
-    for (const button of emotionButtons.querySelectorAll("button")) {
-      button.classList.toggle("active", button.dataset.emotion === snapshot.emotion);
-    }
+    $("params").hidden = !$("showParameters").checked;
+    for (const button of emotionButtons.querySelectorAll("button")) button.classList.toggle("active", button.dataset.emotion === snapshot.emotion);
     requestAnimationFrame(update);
   };
   update();
-  setStatus("원본 PNG 기반 런타임 준비 완료 · TTS 입력은 아직 연결하지 않았습니다.");
+  setStatus("v0.2 런타임 준비 완료 · 마이크 립싱크, 감정별 모션, 시선 추적, 효과 렌더링을 지원합니다.");
+  window.addEventListener("beforeunload", () => avatar.destroy(), { once: true });
 }
 
 function setStatus(message) {
@@ -107,22 +135,19 @@ function setStatus(message) {
 async function runCycle(avatar) {
   setStatus("16개 감정 순환 테스트 중…");
   for (const emotion of EMOTIONS) {
-    await avatar.setEmotion(emotion);
-    await new Promise((resolve) => setTimeout(resolve, 520));
+    await avatar.setEmotion(emotion, { duration: 360 });
+    await sleep(320);
   }
-  await avatar.setEmotion("neutral");
+  await avatar.setEmotion("neutral", { duration: 360 });
   setStatus("16개 감정 순환 테스트 완료.");
 }
 
 async function runTransitionQA(avatar) {
-  const sequence = [
-    "neutral", "excited", "neutral", "teasing", "pleading", "angry", "sad", "happy",
-    "surprised", "scared", "embarrassed", "smug", "confused", "love", "relaxed", "neutral", "sick", "neutral",
-  ];
-  setStatus("가이드의 감정 전환 QA 시나리오 실행 중…");
+  const sequence = ["neutral", "excited", "neutral", "teasing", "pleading", "angry", "sad", "happy", "surprised", "scared", "embarrassed", "smug", "confused", "love", "relaxed", "neutral", "sick", "neutral"];
+  setStatus("감정 전환 QA 시나리오 실행 중…");
   for (const emotion of sequence) {
-    await avatar.setEmotion(emotion);
-    await new Promise((resolve) => setTimeout(resolve, 360));
+    await avatar.setEmotion(emotion, { duration: 320 });
+    await sleep(260);
   }
   setStatus("감정 전환 QA 시나리오 완료.");
 }
@@ -131,4 +156,3 @@ main().catch((error) => {
   console.error(error);
   setStatus(`초기화 실패: ${error.message}`);
 });
-
