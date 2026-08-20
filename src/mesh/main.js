@@ -1,0 +1,149 @@
+import { FALLBACK_PRESETS } from "../avatar/data.js";
+import { createMeshAvatar } from "./controller.js";
+
+const EMOTIONS = [
+  "neutral", "happy", "excited", "teasing", "pleading", "relaxed", "sick", "angry",
+  "annoyed", "sad", "surprised", "embarrassed", "scared", "smug", "confused", "love",
+];
+const LABELS = { neutral: "중립", happy: "행복", excited: "신남", teasing: "장난", pleading: "애원", relaxed: "편안", sick: "아픔", angry: "화남", annoyed: "짜증", sad: "슬픔", surprised: "놀람", embarrassed: "당황", scared: "무서움", smug: "의기양양", confused: "혼란", love: "사랑" };
+const SOURCE_KEYS = { "jirai_stand.png": "stand", "jirai_jump.png": "jump", "jirai_peace.png": "peace", "jirai_uruuru.png": "uruuru", "jirai_gorogoro.png": "gorogoro", "jirai_haku.png": "haku" };
+const $ = (id) => document.getElementById(id);
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function normalizePresets(config) {
+  const raw = config?.presets || config;
+  if (!raw || typeof raw !== "object") return FALLBACK_PRESETS;
+  return Object.fromEntries(Object.entries(raw).map(([id, preset]) => [id, { ...preset, source: SOURCE_KEYS[preset.source] || preset.source }]));
+}
+
+async function loadPresets() {
+  try {
+    const response = await fetch("config/emotion_presets.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("config fetch failed");
+    return normalizePresets(await response.json());
+  } catch {
+    return FALLBACK_PRESETS;
+  }
+}
+
+async function loadMeshOptions() {
+  try { const response = await fetch("config/mesh_rig.json", { cache: "no-store" }); if (!response.ok) throw new Error("mesh config fetch failed"); const config = await response.json(); return config.grid || {}; } catch { return { columns: 24, rows: 28 }; }
+}
+
+async function createRuntime(presets, meshOptions) {
+  const canvas = $("avatarCanvas");
+  try {
+    return { avatar: await createMeshAvatar(canvas, presets, meshOptions), fallback: false };
+  } catch (error) {
+    console.warn("WebGL mesh runtime failed; falling back to Canvas raster runtime", error);
+    const replacement = document.createElement("canvas");
+    for (const attribute of canvas.attributes) replacement.setAttribute(attribute.name, attribute.value);
+    canvas.replaceWith(replacement);
+    const { createAvatar } = await import("../avatar/controller.js");
+    return { avatar: await createAvatar(replacement, presets), fallback: true, error };
+  }
+}
+
+function makeEmotionButtons(container, onSelect) {
+  for (const id of EMOTIONS) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.emotion = id;
+    button.textContent = LABELS[id];
+    button.title = id;
+    button.addEventListener("click", () => onSelect(id));
+    container.appendChild(button);
+  }
+}
+
+function formatParams(snapshot) {
+  const keys = ["ParamAngleX", "ParamAngleY", "ParamAngleZ", "ParamBodyAngleX", "ParamBodyAngleZ", "ParamMouthOpenY", "ParamMouthForm", "ParamBreath"];
+  const header = [`renderer           ${snapshot.renderer || "canvas-raster"}`, `grid               ${snapshot.grid || "n/a"}`];
+  return [...header, ...keys.map((key) => `${key.padEnd(18, " ")} ${Number(snapshot.parameters?.[key] || 0).toFixed(3)}`)].join("\n");
+}
+
+function setStatus(message) { const node = $("status"); if (node) node.textContent = message; }
+
+async function main() {
+  const presets = await loadPresets();
+  const meshOptions = await loadMeshOptions();
+  const { avatar, fallback, error } = await createRuntime(presets, meshOptions);
+  const emotionButtons = $("emotionButtons");
+  const mouth = $("mouthSlider");
+  const micButton = $("microphoneButton");
+  const lipSyncTest = $("lipSyncTest");
+  let micBusy = false;
+  const syncMicButton = (active) => { micButton.classList.toggle("active", active); micButton.textContent = active ? "마이크 립싱크 중지" : "마이크 립싱크 시작"; };
+
+  makeEmotionButtons(emotionButtons, (id) => avatar.setEmotion(id).catch((caught) => setStatus(caught.message)));
+  mouth.addEventListener("input", () => avatar.setMouthOpen(Number(mouth.value)));
+  lipSyncTest.addEventListener("change", async (event) => {
+    if (event.target.checked && avatar.getSnapshot().lipSyncMode === "microphone") await avatar.stopMicrophoneLipSync();
+    syncMicButton(false);
+    avatar.setLipSyncTest(event.target.checked);
+  });
+  micButton.addEventListener("click", async () => {
+    if (micBusy) return;
+    micBusy = true; micButton.disabled = true;
+    try {
+      if (avatar.getSnapshot().lipSyncMode === "microphone") {
+        await avatar.stopMicrophoneLipSync(); syncMicButton(false); setStatus("마이크 립싱크를 중지했습니다.");
+      } else {
+        lipSyncTest.checked = false; avatar.setLipSyncTest(false); await avatar.startMicrophoneLipSync(); syncMicButton(true); setStatus("마이크 기반 viseme 립싱크 실행 중입니다.");
+      }
+    } catch (caught) {
+      syncMicButton(false); setStatus(`마이크 시작 실패: ${caught.message}`);
+    } finally {
+      micBusy = false; micButton.disabled = false;
+    }
+  });
+
+  $("autoBlink").addEventListener("change", (event) => avatar.setBlinkEnabled(event.target.checked));
+  $("breath").addEventListener("change", (event) => avatar.setBreathEnabled(event.target.checked));
+  $("showBounds").addEventListener("change", (event) => avatar.setDebug({ showBounds: event.target.checked }));
+  $("showParameters").addEventListener("change", (event) => { $("params").hidden = !event.target.checked; });
+  $("resetButton").addEventListener("click", async () => { await avatar.reset(); mouth.value = "0"; lipSyncTest.checked = false; syncMicButton(false); setStatus("중립 상태로 초기화했습니다."); });
+  $("cycleButton").addEventListener("click", () => runCycle(avatar));
+  $("qaButton").addEventListener("click", () => runTransitionQA(avatar));
+
+  let lastUiUpdate = -Infinity;
+  const update = (time) => {
+    if (time - lastUiUpdate > 80) {
+      lastUiUpdate = time;
+      const snapshot = avatar.getSnapshot();
+      $("emotionNow").textContent = `${LABELS[snapshot.emotion] || snapshot.emotion} (${snapshot.emotion})`;
+      $("mouthValue").textContent = snapshot.mouthOpen.toFixed(2);
+      $("blinkValue").textContent = snapshot.blinkLevel.toFixed(2);
+      $("fpsValue").textContent = `${snapshot.fps} FPS · ${snapshot.renderer || "Canvas"}`;
+      $("visemeValue").textContent = snapshot.viseme;
+      $("audioMode").textContent = snapshot.lipSyncMode;
+      $("audioLevel").textContent = Number(snapshot.audio?.rms || 0).toFixed(3);
+      $("audioMeterFill").style.width = `${Math.min(100, Math.max(0, (snapshot.audio?.rms || 0) * 520))}%`;
+      $("params").textContent = formatParams(snapshot);
+      for (const button of emotionButtons.querySelectorAll("button")) button.classList.toggle("active", button.dataset.emotion === snapshot.emotion);
+      if (snapshot.lipSyncMode !== "microphone" && micButton.classList.contains("active") && !micBusy) syncMicButton(false);
+    }
+    requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+
+  if (fallback) setStatus(`WebGL 초기화 실패로 Canvas fallback 사용 중: ${error?.message || "unknown error"}`);
+  else setStatus("WebGL mesh rig 활성화 · 24×28 deformation grid + spring secondary motion + viseme overlay");
+  window.addEventListener("pagehide", () => { void avatar.destroy(); }, { once: true });
+}
+
+async function runCycle(avatar) {
+  setStatus("16개 감정 mesh 전환 테스트 중…");
+  for (const emotion of EMOTIONS) { await avatar.setEmotion(emotion, { duration: 300 }); await sleep(230); }
+  await avatar.setEmotion("neutral", { duration: 300 });
+  setStatus("16개 감정 mesh 전환 테스트 완료.");
+}
+
+async function runTransitionQA(avatar) {
+  const sequence = ["neutral", "excited", "teasing", "pleading", "angry", "sad", "happy", "surprised", "scared", "embarrassed", "smug", "confused", "love", "relaxed", "sick", "neutral"];
+  setStatus("WebGL mesh/physics QA 시나리오 실행 중…");
+  for (const emotion of sequence) { await avatar.setEmotion(emotion, { duration: 280 }); await sleep(220); }
+  setStatus("WebGL mesh/physics QA 완료.");
+}
+
+main().catch((error) => { console.error(error); setStatus(`초기화 실패: ${error.message}`); });
