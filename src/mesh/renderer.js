@@ -24,7 +24,7 @@ uniform float u_opacity;
 varying vec2 v_uv;
 void main() {
   vec4 color = texture2D(u_texture, v_uv);
-  gl_FragColor = vec4(color.rgb, color.a * u_opacity);
+  gl_FragColor = vec4(color.rgb * u_opacity, color.a * u_opacity);
 }`;
 
 const LINE_VERTEX_SHADER = `
