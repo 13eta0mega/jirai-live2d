@@ -13,6 +13,7 @@ void main() {
     a_position.x * s + a_position.y * c
   );
   vec2 p = rotated * u_scale + u_offset;
+  // Mesh coordinates are image-space (top=-1, bottom=+1). Clip-space is bottom=-1, top=+1.
   gl_Position = vec4(p.x, -p.y, 0.0, 1.0);
   v_uv = a_uv;
 }`;
@@ -20,10 +21,14 @@ void main() {
 const FRAGMENT_SHADER = `
 precision mediump float;
 uniform sampler2D u_texture;
+uniform sampler2D u_texture_b;
+uniform float u_mix;
 uniform float u_opacity;
 varying vec2 v_uv;
 void main() {
-  vec4 color = texture2D(u_texture, v_uv);
+  vec4 a = texture2D(u_texture, v_uv);
+  vec4 b = texture2D(u_texture_b, v_uv);
+  vec4 color = mix(a, b, clamp(u_mix, 0.0, 1.0));
   gl_FragColor = vec4(color.rgb * u_opacity, color.a * u_opacity);
 }`;
 
@@ -86,6 +91,8 @@ function makeLocations(gl, program, textured) {
     offset: gl.getUniformLocation(program, "u_offset"),
     rotation: gl.getUniformLocation(program, "u_rotation"),
     texture: textured ? gl.getUniformLocation(program, "u_texture") : null,
+    textureB: textured ? gl.getUniformLocation(program, "u_texture_b") : null,
+    mix: textured ? gl.getUniformLocation(program, "u_mix") : null,
     opacity: textured ? gl.getUniformLocation(program, "u_opacity") : null,
     color: textured ? null : gl.getUniformLocation(program, "u_color"),
   };
@@ -110,7 +117,8 @@ export class WebGLMeshRenderer {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    // UVs intentionally use DOM/image top-origin. Flipping here inverts the entire character.
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
     gl.clearColor(0, 0, 0, 0);
   }
 
@@ -128,9 +136,7 @@ export class WebGLMeshRenderer {
     this.gl.viewport(0, 0, pixelWidth, pixelHeight);
   }
 
-  clear() {
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-  }
+  clear() { this.gl.clear(this.gl.COLOR_BUFFER_BIT); }
 
   fitScale(image, occupancy = 0.84) {
     const canvasAspect = Math.max(1e-6, (this.width || 1) / (this.height || 1));
@@ -159,6 +165,10 @@ export class WebGLMeshRenderer {
   }
 
   drawMesh(image, positions, uvs, indices, options = {}) {
+    return this.drawMeshBlend(image, image, positions, uvs, indices, 0, options);
+  }
+
+  drawMeshBlend(imageA, imageB, positions, uvs, indices, mixAmount = 0, options = {}) {
     const gl = this.gl;
     const locations = this.locations;
     gl.useProgram(this.program);
@@ -169,12 +179,12 @@ export class WebGLMeshRenderer {
     gl.vertexAttribPointer(locations.position, 2, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, uvs, gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, uvs, gl.DYNAMIC_DRAW);
     gl.enableVertexAttribArray(locations.uv);
     gl.vertexAttribPointer(locations.uv, 2, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.DYNAMIC_DRAW);
 
     const scale = options.scale || [1, 1];
     const offset = options.offset || [0, 0];
@@ -182,9 +192,14 @@ export class WebGLMeshRenderer {
     gl.uniform2f(locations.offset, offset[0], offset[1]);
     gl.uniform1f(locations.rotation, Number(options.rotation) || 0);
     gl.uniform1f(locations.opacity, Math.max(0, Math.min(1, Number(options.opacity ?? 1))));
+    gl.uniform1f(locations.mix, Math.max(0, Math.min(1, Number(mixAmount) || 0)));
+
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.getTexture(image));
+    gl.bindTexture(gl.TEXTURE_2D, this.getTexture(imageA));
     gl.uniform1i(locations.texture, 0);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.getTexture(imageB || imageA));
+    gl.uniform1i(locations.textureB, 1);
     gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
   }
 
@@ -197,7 +212,7 @@ export class WebGLMeshRenderer {
     gl.enableVertexAttribArray(locations.position);
     gl.vertexAttribPointer(locations.position, 2, gl.FLOAT, false, 0, 0);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.lineIndexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, lineIndices, gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, lineIndices, gl.DYNAMIC_DRAW);
     const scale = options.scale || [1, 1];
     const offset = options.offset || [0, 0];
     gl.uniform2f(locations.scale, scale[0], scale[1]);
