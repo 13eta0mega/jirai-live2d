@@ -14,13 +14,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Static checks
+        run: npm run check
+      - name: Regression tests
+        run: npm test
+
   publish:
+    needs: verify
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout WebGL mesh rig
-        uses: actions/checkout@v6
+      - name: Checkout verified WebGL rig
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Mirror current commit to gh-pages
+      - name: Mirror verified commit to gh-pages
         run: git push origin HEAD:refs/heads/gh-pages

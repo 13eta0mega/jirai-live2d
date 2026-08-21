@@ -1,15 +1,22 @@
 {
-  "version": 2,
-  "renderer": "webgl-articulated",
+  "version": 3,
+  "renderer": "webgl-hybrid-articulated-v4",
   "grid": { "columns": 24, "rows": 28 },
   "fallback": "canvas-raster",
-  "assetStrategy": "runtime-extracted-arm-layers + emotion-aware-face-overlays + source-fallback",
+  "assetStrategy": "generated-emotion-endpoints + articulated-mid-transition + emotion-aware-visemes",
   "articulatedSources": ["stand", "jump", "peace"],
+  "generatedReferenceEmotions": ["neutral", "happy", "excited", "angry", "embarrassed", "sad", "surprised", "scared", "teasing", "love"],
   "faceRig": {
-    "underpaintSourceFeatures": true,
     "emotionSpecificAnchors": true,
     "visemeSafeBounds": true,
+    "generatedReferenceMouthAnchors": true,
+    "runtimeMouthUnderpaint": true,
     "expressionChannelTiming": true
   },
-  "notes": "v0.3.0-alpha.3 splits conservative arm masks from flattened source sprites at runtime, rotates those layers around shoulder pivots, and repaints facial source features before emotion/viseme overlays to prevent double mouths and eyes. Unconfigured source poses retain the original raster fallback path."
+  "transition": {
+    "generatedEndpointArt": true,
+    "articulatedMidArc": true,
+    "opacityNormalizedHandoff": true
+  },
+  "notes": "v0.4.0-alpha.1 uses ten generated emotion reference endpoints for final-pose fidelity while retaining the articulated WebGL renderer through the middle of transitions. Generated faces use emotion-specific lip-sync anchors; the remaining emotions use the existing articulated face rig."
 }

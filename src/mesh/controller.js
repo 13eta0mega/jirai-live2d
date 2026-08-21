@@ -5,9 +5,10 @@ import { createSecondaryMotionState } from './physics.js';
 import { WebGLMeshRenderer } from './renderer.js';
 import { clamp, emptyAudio, loadImage, loadOptional, now } from './controller-common.js';
 import { buildSourceLayers, createProceduralFaceParts, normalizeOverlayParts } from './layer-rig.js';
+import { GENERATED_REFERENCE_FILES, buildGeneratedMouthCover } from './generated-reference-rig.js';
 import { stateMethods } from './controller-state.js';
 import { renderMethods } from './controller-render.js';
-
+import { hybridRenderMethods } from './controller-hybrid.js';
 
 const withSemanticRigSources = (presets) => ({
   ...presets,
@@ -21,6 +22,7 @@ export class MeshAvatarController {
     this.grid = createGrid(options.columns || 24, options.rows || 28); this.deformed = new Float32Array(this.grid.positions.length);
     this.armDeformedLeft = new Float32Array(this.grid.positions.length); this.armDeformedRight = new Float32Array(this.grid.positions.length);
     this.secondary = createSecondaryMotionState(); this.images = {}; this.layers = {}; this.parts = {};
+    this.generatedReferences = {}; this.generatedReferenceCovers = {};
     this.currentEmotion = 'neutral'; this.currentIntensity = 1; this.emotionStartedAt = now(); this.transition = null; this.lastTransitionSample = null; this.armPoseSnapshot = null;
     this.manualMouth = 0; this.mouthTarget = 0; this.mouthOpen = 0; this.mouthForm = 0; this.mouthFormTarget = 0;
     this.viseme = 'CLOSED'; this.previousViseme = 'CLOSED'; this.visemeChangedAt = now();
@@ -44,6 +46,11 @@ export class MeshAvatarController {
       try { return [source, buildSourceLayers(image, source)]; }
       catch (error) { console.warn(`[mesh-rig] articulated layer extraction disabled for ${source}`, error); return [source, { body: image, leftArm: null, rightArm: null, covers: {}, articulated: false }]; }
     }));
+    this.generatedReferences = await loadOptional(Object.entries(GENERATED_REFERENCE_FILES));
+    this.generatedReferenceCovers = Object.fromEntries(Object.entries(this.generatedReferences).map(([emotion, image]) => {
+      try { return [emotion, buildGeneratedMouthCover(image, emotion)]; }
+      catch (error) { console.warn(`[mesh-rig] generated mouth cover disabled for ${emotion}`, error); return [emotion, null]; }
+    }).filter(([, cover]) => Boolean(cover)));
     this.resize(); return this;
   }
 
@@ -59,5 +66,5 @@ export class MeshAvatarController {
   stop() { this.started = false; }
 }
 
-Object.assign(MeshAvatarController.prototype, stateMethods, renderMethods);
+Object.assign(MeshAvatarController.prototype, stateMethods, renderMethods, hybridRenderMethods);
 export async function createMeshAvatar(canvas, presets = FALLBACK_PRESETS, options = {}) { const avatar = new MeshAvatarController(canvas, presets, options); await avatar.load(); avatar.start(); return avatar; }

@@ -4,31 +4,62 @@ import { createMeshAvatar } from './controller.js';
 const EMOTIONS = ['neutral','happy','excited','teasing','pleading','relaxed','sick','angry','annoyed','sad','surprised','embarrassed','scared','smug','confused','love'];
 const LABELS = { neutral:'중립', happy:'행복', excited:'신남', teasing:'장난', pleading:'애원', relaxed:'편안', sick:'아픔', angry:'화남', annoyed:'짜증', sad:'슬픔', surprised:'놀람', embarrassed:'당황', scared:'무서움', smug:'의기양양', confused:'혼란', love:'사랑' };
 const SOURCE_KEYS = { 'jirai_stand.png':'stand','jirai_jump.png':'jump','jirai_peace.png':'peace','jirai_uruuru.png':'uruuru','jirai_gorogoro.png':'gorogoro','jirai_haku.png':'haku' };
-const $ = (id) => document.getElementById(id); const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-function normalizePresets(config) { const raw=config?.presets||config; if(!raw||typeof raw!=='object') return FALLBACK_PRESETS; return Object.fromEntries(Object.entries(raw).map(([id,preset])=>[id,{...preset,source:SOURCE_KEYS[preset.source]||preset.source}])); }
-async function loadPresets(){ try{const response=await fetch('config/emotion_presets.json',{cache:'no-store'});if(!response.ok)throw new Error('config fetch failed');return normalizePresets(await response.json());}catch{return FALLBACK_PRESETS;} }
-async function loadMeshOptions(){ try{const response=await fetch('config/mesh_rig.json',{cache:'no-store'});if(!response.ok)throw new Error('mesh config fetch failed');const config=await response.json();return config.grid||{};}catch{return{columns:24,rows:28};} }
-async function createRuntime(presets,meshOptions){const canvas=$('avatarCanvas');try{return{avatar:await createMeshAvatar(canvas,presets,meshOptions),fallback:false};}catch(error){console.warn('WebGL articulated runtime failed; falling back to Canvas raster runtime',error);const replacement=document.createElement('canvas');for(const attribute of canvas.attributes)replacement.setAttribute(attribute.name,attribute.value);canvas.replaceWith(replacement);const{createAvatar}=await import('../avatar/controller.js');return{avatar:await createAvatar(replacement,presets),fallback:true,error};}}
-function makeEmotionButtons(container,onSelect){for(const id of EMOTIONS){const button=document.createElement('button');button.type='button';button.dataset.emotion=id;button.textContent=LABELS[id];button.title=id;button.addEventListener('click',()=>onSelect(id));container.appendChild(button);}}
-function formatParams(snapshot){const keys=['ParamAngleX','ParamAngleY','ParamAngleZ','ParamBodyAngleX','ParamBodyAngleZ','ParamMouthOpenY','ParamMouthForm','ParamBreath'];const transition=snapshot.transition?`${snapshot.transition.from}->${snapshot.transition.to} ${(snapshot.transition.progress*100).toFixed(0)}% mix=${snapshot.transition.sourceMix.toFixed(2)} ${snapshot.transition.motion||''}`:'idle';const left=snapshot.armPose?.left?.worldAngle;const right=snapshot.armPose?.right?.worldAngle;const arms=Number.isFinite(left)&&Number.isFinite(right)?`L=${left.toFixed(1)}deg R=${right.toFixed(1)}deg`:'source-native/fallback';const header=[`renderer           ${snapshot.renderer||'canvas-raster'}`,`grid               ${snapshot.grid||'n/a'}`,`transition         ${transition}`,`arm pose           ${arms}`];return[...header,...keys.map((key)=>`${key.padEnd(18,' ')} ${Number(snapshot.parameters?.[key]||0).toFixed(3)}`)].join('\n');}
-function setStatus(message){const node=$('status');if(node)node.textContent=message;}
-async function main(){
-  const presets=await loadPresets();const meshOptions=await loadMeshOptions();const{avatar,fallback,error}=await createRuntime(presets,meshOptions);window.__jiraiAvatar=avatar;const emotionButtons=$('emotionButtons');const mouth=$('mouthSlider');const micButton=$('microphoneButton');const lipSyncTest=$('lipSyncTest');let micBusy=false;
-  const syncMicButton=(active)=>{micButton.classList.toggle('active',active);micButton.textContent=active?'마이크 립싱크 중지':'마이크 립싱크 시작';};
-  makeEmotionButtons(emotionButtons,(id)=>avatar.setEmotion(id).catch((caught)=>setStatus(caught.message)));mouth.addEventListener('input',()=>avatar.setMouthOpen(Number(mouth.value)));
-  lipSyncTest.addEventListener('change',async(event)=>{if(event.target.checked&&avatar.getSnapshot().lipSyncMode==='microphone')await avatar.stopMicrophoneLipSync();syncMicButton(false);avatar.setLipSyncTest(event.target.checked);});
-  micButton.addEventListener('click',async()=>{if(micBusy)return;micBusy=true;micButton.disabled=true;try{if(avatar.getSnapshot().lipSyncMode==='microphone'){await avatar.stopMicrophoneLipSync();syncMicButton(false);setStatus('마이크 립싱크를 중지했습니다.');}else{lipSyncTest.checked=false;avatar.setLipSyncTest(false);await avatar.startMicrophoneLipSync();syncMicButton(true);setStatus('마이크 기반 감정별 viseme 립싱크 실행 중입니다.');}}catch(caught){syncMicButton(false);setStatus(`마이크 시작 실패: ${caught.message}`);}finally{micBusy=false;micButton.disabled=false;}});
-  $('autoBlink').addEventListener('change',(event)=>avatar.setBlinkEnabled(event.target.checked));$('breath').addEventListener('change',(event)=>avatar.setBreathEnabled(event.target.checked));$('showBounds').addEventListener('change',(event)=>avatar.setDebug({showBounds:event.target.checked}));$('showParameters').addEventListener('change',(event)=>{$('params').hidden=!event.target.checked;});
-  $('resetButton').addEventListener('click',async()=>{await avatar.reset();mouth.value='0';lipSyncTest.checked=false;syncMicButton(false);setStatus('중립 상태로 초기화했습니다.');});$('cycleButton').addEventListener('click',()=>runCycle(avatar));$('qaButton').addEventListener('click',()=>runStrictQA(avatar));
-  let lastUiUpdate=-Infinity;const update=(time)=>{if(time-lastUiUpdate>80){lastUiUpdate=time;const snapshot=avatar.getSnapshot();$('emotionNow').textContent=`${LABELS[snapshot.emotion]||snapshot.emotion} (${snapshot.emotion})`;$('mouthValue').textContent=snapshot.mouthOpen.toFixed(2);$('blinkValue').textContent=snapshot.blinkLevel.toFixed(2);$('fpsValue').textContent=`${snapshot.fps} FPS · ${snapshot.renderer||'Canvas'}`;$('visemeValue').textContent=snapshot.viseme;$('audioMode').textContent=snapshot.lipSyncMode;$('audioLevel').textContent=Number(snapshot.audio?.rms||0).toFixed(3);$('audioMeterFill').style.width=`${Math.min(100,Math.max(0,(snapshot.audio?.rms||0)*520))}%`;$('params').textContent=formatParams(snapshot);for(const button of emotionButtons.querySelectorAll('button'))button.classList.toggle('active',button.dataset.emotion===snapshot.emotion);if(snapshot.lipSyncMode!=='microphone'&&micButton.classList.contains('active')&&!micBusy)syncMicButton(false);}requestAnimationFrame(update);};requestAnimationFrame(update);
-  if(fallback)setStatus(`WebGL 초기화 실패로 Canvas fallback 사용 중: ${error?.message||'unknown error'}`);else setStatus('v0.3.0-alpha.3 · runtime arm layers + emotion-aware face/viseme rig + underpaint anti-overlap');window.addEventListener('pagehide',()=>{void avatar.destroy();},{once:true});
+const $ = (id) => document.getElementById(id);
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function normalizePresets(config) {
+  const raw = config?.presets || config;
+  if (!raw || typeof raw !== 'object') return FALLBACK_PRESETS;
+  return Object.fromEntries(Object.entries(raw).map(([id,preset]) => [id,{...preset,source:SOURCE_KEYS[preset.source]||preset.source}]));
 }
-async function runCycle(avatar){setStatus('16개 감정 articulated 전환 테스트 중…');for(const emotion of EMOTIONS){await avatar.setEmotion(emotion,{duration:700});await sleep(300);}await avatar.setEmotion('neutral',{duration:700});setStatus('16개 감정 articulated 전환 테스트 완료.');}
-async function runVisemeSweep(avatar,emotion){await avatar.setEmotion(emotion,{duration:560});for(const viseme of ['A','I','U','E','O','CLOSED']){avatar.setViseme(viseme,viseme==='CLOSED'?0:0.92);await sleep(125);}}
+async function loadPresets(){
+  try { const r=await fetch('config/emotion_presets.json',{cache:'no-store'}); if(!r.ok) throw new Error(); return normalizePresets(await r.json()); }
+  catch { return FALLBACK_PRESETS; }
+}
+async function loadMeshOptions(){
+  try { const r=await fetch('config/mesh_rig.json',{cache:'no-store'}); if(!r.ok) throw new Error(); return (await r.json()).grid||{}; }
+  catch { return {columns:24,rows:28}; }
+}
+async function createRuntime(presets,meshOptions){
+  const canvas=$('avatarCanvas');
+  try { return {avatar:await createMeshAvatar(canvas,presets,meshOptions),fallback:false}; }
+  catch(error){
+    console.warn('WebGL hybrid runtime failed; falling back to Canvas raster runtime',error);
+    const replacement=document.createElement('canvas'); for(const attribute of canvas.attributes) replacement.setAttribute(attribute.name,attribute.value); canvas.replaceWith(replacement);
+    const {createAvatar}=await import('../avatar/controller.js'); return {avatar:await createAvatar(replacement,presets),fallback:true,error};
+  }
+}
+function setStatus(message){ $('status').textContent = message; }
+function makeEmotionButtons(container,onSelect){
+  for(const id of EMOTIONS){ const b=document.createElement('button'); b.type='button'; b.dataset.emotion=id; b.textContent=LABELS[id]; b.title=id; b.addEventListener('click',()=>onSelect(id)); container.appendChild(b); }
+}
+function formatParams(s){
+  const t=s.transition?`${s.transition.from}->${s.transition.to} ${(s.transition.progress*100).toFixed(0)}%`:'idle';
+  const rb=s.referenceBlend?`ref from=${s.referenceBlend.from.toFixed(2)} art=${s.referenceBlend.articulated.toFixed(2)} to=${s.referenceBlend.to.toFixed(2)}`:'n/a';
+  const left=s.armPose?.left?.worldAngle; const right=s.armPose?.right?.worldAngle;
+  const arms=Number.isFinite(left)&&Number.isFinite(right)?`L=${left.toFixed(1)}deg R=${right.toFixed(1)}deg`:'source-native/fallback';
+  return [`renderer ${s.renderer}`,`transition ${t}`,`hybrid ${rb}`,`arm pose ${arms}`,`viseme ${s.viseme}`,`mouth ${s.mouthOpen.toFixed(3)}`,...Object.entries(s.parameters||{}).slice(0,18).map(([k,v])=>`${k} ${Number(v).toFixed(3)}`)].join('\n');
+}
+async function runVisemeSweep(avatar,emotion){ await avatar.setEmotion(emotion,{duration:650}); for(const viseme of ['A','I','U','E','O','CLOSED']){ avatar.setViseme(viseme,viseme==='CLOSED'?0:0.92); await sleep(180); } }
 async function runStrictQA(avatar){
-  const transitions=[['neutral',520],['happy',620],['neutral',520],['excited',860],['neutral',820],['teasing',740],['pleading',740],['sad',660],['surprised',640],['scared',580],['embarrassed',660],['smug',740],['confused',680],['love',860],['relaxed',920],['sick',780],['neutral',820]];
-  setStatus('엄격 QA: 팔 관절/표정 보간 전환 검사 중…');for(const[emotion,duration]of transitions){await avatar.setEmotion(emotion,{duration});await sleep(300);}
-  setStatus('엄격 QA: 16개 감정 × A/I/U/E/O 입 위치/겹침 검사 중…');for(const emotion of EMOTIONS)await runVisemeSweep(avatar,emotion);
-  avatar.setViseme('CLOSED',0);await avatar.setEmotion('neutral',{duration:650});setStatus('엄격 QA 시나리오 완료 · arm articulation + emotion face anchors + viseme bounds');
+  setStatus('v0.4 QA: 감정 전환 중…');
+  for(const e of EMOTIONS){ await avatar.setEmotion(e,{duration:e==='excited'?900:700}); await sleep(260); }
+  setStatus('v0.4 QA: 16감정 × 6 viseme 검사 중…');
+  for(const e of EMOTIONS) await runVisemeSweep(avatar,e);
+  avatar.setViseme('CLOSED',0); await avatar.setEmotion('neutral',{duration:700}); setStatus('v0.4 QA 시나리오 완료');
 }
-main().catch((error)=>{console.error(error);setStatus(`초기화 실패: ${error.message}`);});
+async function main(){
+  const {avatar,fallback,error}=await createRuntime(await loadPresets(),await loadMeshOptions()); window.__jiraiAvatar=avatar;
+  const buttons=$('emotionButtons'); const mouth=$('mouthSlider'); const mic=$('microphoneButton'); const lipTest=$('lipSyncTest'); let busy=false;
+  makeEmotionButtons(buttons,(id)=>avatar.setEmotion(id,{duration:760}).catch(e=>setStatus(e.message)));
+  mouth.addEventListener('input',()=>avatar.setMouthOpen(Number(mouth.value)));
+  lipTest.addEventListener('change',async(e)=>{ if(e.target.checked&&avatar.getSnapshot().lipSyncMode==='microphone') await avatar.stopMicrophoneLipSync(); avatar.setLipSyncTest(e.target.checked); });
+  mic.addEventListener('click',async()=>{ if(busy)return; busy=true; try{ if(avatar.getSnapshot().lipSyncMode==='microphone'){await avatar.stopMicrophoneLipSync();mic.textContent='마이크 립싱크 시작';} else {lipTest.checked=false;avatar.setLipSyncTest(false);await avatar.startMicrophoneLipSync();mic.textContent='마이크 립싱크 중지';} }catch(e){setStatus(`마이크 오류: ${e.message}`);} finally{busy=false;} });
+  $('autoBlink').addEventListener('change',e=>avatar.setBlinkEnabled(e.target.checked)); $('breath').addEventListener('change',e=>avatar.setBreathEnabled(e.target.checked)); $('showBounds').addEventListener('change',e=>avatar.setDebug({showBounds:e.target.checked})); $('showParameters').addEventListener('change',e=>$('params').hidden=!e.target.checked);
+  $('resetButton').addEventListener('click',async()=>{await avatar.reset();mouth.value='0';lipTest.checked=false;mic.textContent='마이크 립싱크 시작';}); $('qaButton').addEventListener('click',()=>runStrictQA(avatar));
+  $('cycleButton').addEventListener('click',async()=>{for(const e of EMOTIONS){await avatar.setEmotion(e,{duration:700});await sleep(250);}await avatar.setEmotion('neutral',{duration:700});});
+  let last=0; const tick=(time)=>{ if(time-last>80){last=time;const s=avatar.getSnapshot();$('emotionNow').textContent=`${LABELS[s.emotion]||s.emotion} (${s.emotion})`; $('mouthValue').textContent=s.mouthOpen.toFixed(2); $('blinkValue').textContent=s.blinkLevel.toFixed(2); $('fpsValue').textContent=`${s.fps} FPS · ${s.renderer||'Canvas'}`; $('visemeValue').textContent=s.viseme; $('audioMode').textContent=s.lipSyncMode; $('audioLevel').textContent=Number(s.audio?.rms||0).toFixed(3); $('audioMeterFill').style.width=`${Math.min(100,(s.audio?.rms||0)*520)}%`; $('params').textContent=formatParams(s); for(const b of buttons.querySelectorAll('button')) b.classList.toggle('active',b.dataset.emotion===s.emotion); } requestAnimationFrame(tick); }; requestAnimationFrame(tick);
+  if(fallback)setStatus(`WebGL 초기화 실패로 Canvas fallback 사용 중: ${error?.message||'unknown error'}`); else setStatus('v0.4.0-alpha.1 · generated emotion endpoints + articulated in-between + emotion-specific viseme anchors');
+  window.addEventListener('pagehide',()=>void avatar.destroy(),{once:true});
+}
+main().catch(e=>{console.error(e);setStatus(`초기화 실패: ${e.message}`);});

@@ -1,37 +1,26 @@
-# Jirai 2D Avatar — Articulated WebGL Rig v0.3.0-alpha.3
+# Jirai 2D Avatar — Hybrid Articulated WebGL Rig v0.4.0-alpha.1
 
-Cubism 없이 WebGL에서 동작하는 실험 2D puppet 런타임이다. `release/v0.2.1-raster`는 기존 Canvas 기반 안정 기준선으로 유지한다.
+Cubism 없이 WebGL에서 동작하는 2D puppet 실험 런타임이다. `release/v0.2.1-raster`는 Canvas 안정 기준선이며, `release/v0.3.0-alpha.3`는 이전 articulated 기준선이다.
 
-## v0.3.0-alpha.3 — articulated arm + emotion face QA
+## v0.4.0-alpha.1
 
-사용자 실행 녹화에서 확인된 “메시만 흔들리고 팔은 움직이지 않음”, 감정과 표정 불일치, 립싱크 입 파츠 고정 좌표/겹침 문제를 기준으로 렌더 구조를 다시 분리했다.
+이번 버전은 최종 감정 포즈의 그림 품질과 전환 중 실제 관절 동작을 분리해 처리한다.
 
-- **실제 팔 레이어 회전**: `stand`, `jump`, `peace` flattened PNG에서 좌/우 팔을 런타임 mask로 분리하고 shoulder pivot 기준 rigid rotation을 적용한다. `neutral → excited`는 양팔 world angle이 60° 이상 변해야 회귀 테스트를 통과한다.
-- **팔 texture hand-off**: source가 바뀌어도 from/to arm layer가 같은 world angle을 유지한 채 짧은 midpoint hand-off를 수행한다. 긴 full-character dissolve를 피하기 위해 body texture hand-off window도 중앙 구간으로 좁혔다.
-- **shoulder seam cover**: 팔 제거/회전 경계에 source shoulder patch를 다시 합성해 투명 구멍과 관절 seam을 줄인다.
-- **감정별 얼굴 rig**: 16개 감정 각각 eye mode, eye scale, brow angle, mouth scale/shift를 따로 갖는다. `surprised`는 raised-arm `jump`, `scared`는 `uruuru` 계열로 semantic source를 수정했다.
-- **감정별 viseme anchor**: A/I/U/E/O/CLOSED 입 모양이 감정별 mouth anchor와 safe bounds를 사용한다. transparent padding을 런타임 trim해 파츠 자체의 여백 때문에 입이 튀는 현상을 줄인다.
-- **이중 눈/입 방지**: 원본 source의 눈·눈썹·입을 source 피부색 기반 feathered underpaint로 먼저 지운 뒤 overlay를 한 번만 렌더링한다.
-- **표정 채널 보간**: 눈썹 → 눈 → 입 → 볼 순으로 서로 다른 timing curve를 사용하며 source 변경 중앙에는 blink bridge를 넣어 얼굴이 순간 교체되는 느낌을 줄인다. 감정의 `eyeOpen`을 blink로 오인해 open/closed 눈이 겹치던 경로도 제거했다.
-- **엄격 QA UI**: 웹의 `엄격 전환/립싱크 QA`가 전환 시나리오 후 16개 감정 × 6개 viseme을 순회한다.
+- **10개 생성 reference endpoint**: neutral, happy, excited, angry, embarrassed, sad, surprised, scared, teasing, love는 별도 생성 원화를 최종 포즈로 사용한다.
+- **실제 중간동작 유지**: 감정 전환 중앙 구간은 기존 WebGL articulated arm/body renderer가 담당한다. reference와 articulated pass는 정규화된 opacity hand-off로 섞여 이중 실루엣을 줄인다.
+- **감정별 립싱크 좌표**: 생성 reference 10종은 각각 독립 mouth anchor를 사용하며 A/I/U/E/O/CLOSED 위치와 크기를 감정별 얼굴에 맞춘다.
+- **원화 입 보존**: 립싱크가 비활성일 때 생성 원화의 입을 그대로 보여준다. 립싱크가 활성화될 때만 feathered skin cover로 원화 입을 가리고 viseme을 그린다.
+- **나머지 6개 감정 fallback**: pleading, relaxed, sick, annoyed, smug, confused는 검증된 v0.3 articulated face/arm 경로를 유지한다. 저품질 생성 복제본으로 대체하지 않는다.
+- **기존 QA 유지**: 팔 world-angle 연속성, source hand-off, 감정별 eye/brow/mouth bounds, texture Y 방향, NaN/Infinity 검사에 hybrid reference 회귀를 추가했다.
 
-## 자동 검수
+## 검수
 
 ```powershell
 npm run check
 npm test
 ```
 
-`tools/test_articulated_rig.mjs`는 다음을 실패 조건으로 둔다.
-
-- `neutral → excited` 좌/우 팔 각도 변화와 120-frame 연속성
-- arm texture hand-off 전후 동일 world angle 유지
-- 장시간 full-character dissolve 재발
-- 16개 감정의 명시적 eye mode/face anchor
-- 16개 감정 × A/I/U/E/O/CLOSED mouth safe bounds
-- 같은 source 감정들이 하나의 고정 mouth rect를 공유하는 회귀
-- source-changing face transition의 blink bridge
-- overlay padding trim, feathered underpaint, shoulder seam layer의 구조적 존재
+`tools/test_hybrid_reference.mjs`는 16개 감정 × 6 viseme의 mouth anchor와 생성 reference 전환 opacity를 검사한다.
 
 실행:
 
@@ -39,8 +28,8 @@ npm test
 node .\tools\serve.mjs
 ```
 
-브라우저에서 `http://127.0.0.1:4173/`을 연다. GitHub Pages 배포본에서는 `Show mesh`, `Show parameters`, `엄격 전환/립싱크 QA`를 함께 사용한다.
+브라우저에서 `http://127.0.0.1:4173/`을 연다. GitHub Pages에서는 `엄격 전환/립싱크 QA`, `Show mesh`, `Show parameters`로 전환 상태를 확인할 수 있다.
 
-## 남는 구조적 한계
+## 알려진 한계
 
-현재 원본은 완전한 layered PSD/ArtMesh가 아니라 flattened pose PNG이다. `stand`, `jump`, `peace`는 팔을 런타임 분리해 실제 shoulder rotation을 수행하지만 `uruuru`, `haku`, `gorogoro`는 가려진 팔/몸 픽셀이 없어 source hand-off와 proxy pose를 함께 사용한다. Cubism 수준의 팔꿈치/손목/머리카락 독립 운동까지 가려면 원본을 `UpperArm/LowerArm/Hand`, `Face`, `Eye`, `Mouth`, `Hair` 등으로 분리하는 단계가 필요하다.
+생성 reference endpoint는 고품질 최종 포즈를 제공하지만 독립 PSD/ArtMesh 원본은 아니다. 중앙 articulated 구간은 기존 flattened source에서 추출한 arm layer를 사용하므로 Cubism 수준의 완전한 occlusion 복원/머리카락 독립 변형에는 한계가 있다. 이 alpha는 최종 포즈 fidelity와 실제 in-between motion을 우선한 하이브리드 단계다.
