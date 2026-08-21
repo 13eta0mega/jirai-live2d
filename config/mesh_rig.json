@@ -3,9 +3,10 @@
   "renderer": "webgl-hybrid-articulated-v4",
   "grid": { "columns": 24, "rows": 28 },
   "fallback": "canvas-raster",
-  "assetStrategy": "generated-emotion-endpoints + articulated-mid-transition + emotion-aware-visemes",
+  "assetStrategy": "verified-generated-emotion-endpoints + articulated-mid-transition + emotion-aware-visemes",
   "articulatedSources": ["stand", "jump", "peace"],
-  "generatedReferenceEmotions": ["neutral", "happy", "excited", "angry", "embarrassed", "sad", "surprised", "scared", "teasing", "love"],
+  "generatedReferenceEmotions": ["neutral", "happy", "excited", "angry", "embarrassed", "surprised", "scared", "teasing", "love"],
+  "articulatedFallbackEmotions": ["pleading", "relaxed", "sick", "annoyed", "sad", "smug", "confused"],
   "faceRig": {
     "emotionSpecificAnchors": true,
     "visemeSafeBounds": true,
@@ -18,5 +19,5 @@
     "articulatedMidArc": true,
     "opacityNormalizedHandoff": true
   },
-  "notes": "v0.4.0-alpha.1 uses ten generated emotion reference endpoints for final-pose fidelity while retaining the articulated WebGL renderer through the middle of transitions. Generated faces use emotion-specific lip-sync anchors; the remaining emotions use the existing articulated face rig."
+  "notes": "v0.4.0-alpha.1 uses nine verified generated emotion reference endpoints for final-pose fidelity. Sad and six other states retain the articulated fallback path; all sixteen emotions retain emotion-aware lip-sync."
 }

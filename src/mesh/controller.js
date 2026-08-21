@@ -5,7 +5,8 @@ import { createSecondaryMotionState } from './physics.js';
 import { WebGLMeshRenderer } from './renderer.js';
 import { clamp, emptyAudio, loadImage, loadOptional, now } from './controller-common.js';
 import { buildSourceLayers, createProceduralFaceParts, normalizeOverlayParts } from './layer-rig.js';
-import { GENERATED_REFERENCE_FILES, buildGeneratedMouthCover } from './generated-reference-rig.js';
+import { buildGeneratedMouthCover } from './generated-reference-rig.js';
+import { loadGeneratedReferencePack } from './generated-reference-pack.js';
 import { stateMethods } from './controller-state.js';
 import { renderMethods } from './controller-render.js';
 import { hybridRenderMethods } from './controller-hybrid.js';
@@ -46,7 +47,12 @@ export class MeshAvatarController {
       try { return [source, buildSourceLayers(image, source)]; }
       catch (error) { console.warn(`[mesh-rig] articulated layer extraction disabled for ${source}`, error); return [source, { body: image, leftArm: null, rightArm: null, covers: {}, articulated: false }]; }
     }));
-    this.generatedReferences = await loadOptional(Object.entries(GENERATED_REFERENCE_FILES));
+    try {
+      this.generatedReferences = await loadGeneratedReferencePack();
+    } catch (error) {
+      console.warn('[mesh-rig] generated reference text pack unavailable; articulated fallback remains active', error);
+      this.generatedReferences = {};
+    }
     this.generatedReferenceCovers = Object.fromEntries(Object.entries(this.generatedReferences).map(([emotion, image]) => {
       try { return [emotion, buildGeneratedMouthCover(image, emotion)]; }
       catch (error) { console.warn(`[mesh-rig] generated mouth cover disabled for ${emotion}`, error); return [emotion, null]; }
