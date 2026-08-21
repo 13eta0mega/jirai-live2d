@@ -1,75 +1,29 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Jirai 2D Avatar · Raster Live2D 준비 런타임</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <main class="shell">
-      <header class="hero">
-        <div>
-          <p class="eyebrow">ORIGINAL PNG PRESERVED · LIVE2D PREP</p>
-          <h1>Jirai 2D Avatar</h1>
-          <p class="sub">원본 래스터 파츠를 보존한 감정·호흡·눈깜빡임·립싱크 검증 화면</p>
-        </div>
-        <div class="status-pill" id="fpsValue">-- FPS</div>
-      </header>
-
-      <section class="workspace">
-        <div class="stage-card">
-          <div class="stage-topline">
-            <span>현재 감정</span>
-            <strong id="emotionNow">불러오는 중…</strong>
-          </div>
-          <div class="canvas-wrap">
-            <canvas id="avatarCanvas" aria-label="Jirai 아바타 미리보기"></canvas>
-          </div>
-          <div class="stage-note">※ `.cmo3/.moc3`를 가장하지 않고, 제공된 PNG 기반 래스터 전환을 검증합니다.</div>
-        </div>
-
-        <aside class="controls-card">
-          <section class="control-section">
-            <div class="section-title">감정 16종</div>
-            <div class="emotion-grid" id="emotionButtons"></div>
-            <div class="button-row">
-              <button class="secondary" id="cycleButton" type="button">16종 순환</button>
-              <button class="secondary" id="qaButton" type="button">전환 QA</button>
-              <button class="secondary" id="resetButton" type="button">초기화</button>
-            </div>
-          </section>
-
-          <section class="control-section">
-            <div class="section-title">입 / 립싱크</div>
-            <label class="range-label" for="mouthSlider"><span>MouthOpenY</span><output id="mouthValue">0.00</output></label>
-            <input id="mouthSlider" type="range" min="0" max="1" step="0.01" value="0" />
-            <p class="hint">현재 TTS는 연결하지 않았습니다. 아래 테스트 파형 또는 향후 viseme 입력을 연결할 수 있습니다.</p>
-          </section>
-
-          <section class="control-section toggles">
-            <label><input id="lipSyncTest" type="checkbox" /> Auto lip-sync test</label>
-            <label><input id="autoBlink" type="checkbox" checked /> Auto blink</label>
-            <label><input id="breath" type="checkbox" checked /> Breath</label>
-            <label><input id="showParameters" type="checkbox" /> Show parameters</label>
-            <label><input id="showBounds" type="checkbox" /> Show ArtMesh bounds</label>
-          </section>
-
-          <section class="control-section debug-section">
-            <div class="debug-line"><span>blink level</span><strong id="blinkValue">1.00</strong></div>
-            <pre id="params">parameter snapshot</pre>
-          </section>
-
-          <div class="status" id="status">초기화 중…</div>
-        </aside>
-      </section>
-
-      <footer>
-        <span>Source: `assets/source/` · derived crops: `assets/parts/`</span>
-        <span>Runtime API: setEmotion · setMouthOpen · setViseme · setLipSyncTest</span>
-      </footer>
-    </main>
-    <script type="module" src="src/avatar/main.js"></script>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>Jirai Raster Rig · PC / ESP32-S3 prototype</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div><div class="eyebrow">SOURCE-PRESERVING RASTER RIG</div><h1>Jirai Desk Pet Runtime</h1><p>원본 PNG 픽셀을 보존하면서 눈·입만 파츠화한 PC 검증 런타임</p></div>
+      <div class="status-chips"><span id="fpsChip">-- FPS</span><span id="modeChip">RIG</span><span id="assetChip">-- KB</span></div>
+    </header>
+    <section class="layout">
+      <section class="viewer-card"><div class="viewer-toolbar"><strong id="emotionLabel">기본</strong><span id="stateLabel">idle · blink · breath</span></div><div class="canvas-frame"><canvas id="avatarCanvas" width="720" height="720" aria-label="Jirai avatar preview"></canvas><div class="ground"></div></div><div class="timeline"><div class="wave" id="wave"></div><span id="mouthReadout">Mouth 0.00</span></div></section>
+      <aside class="panel-card">
+        <section class="panel-section"><div class="section-head"><strong>감정 16종</strong><span>cross-fade 240 ms</span></div><div class="emotion-grid" id="emotionGrid"></div></section>
+        <section class="panel-section"><div class="section-head"><strong>애니메이션</strong><span>PC prototype</span></div><div class="switch-grid"><label><input id="blinkToggle" type="checkbox" checked /> 자동 눈깜빡임</label><label><input id="breathToggle" type="checkbox" checked /> 호흡 / idle sway</label><label><input id="lipToggle" type="checkbox" /> 테스트 립싱크</label><label><input id="pixelToggle" type="checkbox" /> ESP 미리보기</label></div><label class="slider-row"><span>수동 MouthOpenY</span><output id="mouthValue">0.00</output><input id="mouthSlider" type="range" min="0" max="1" step="0.01" value="0" /></label><label class="select-row"><span>렌더 목표</span><select id="fpsTarget"><option value="60">60 FPS (PC)</option><option value="30" selected>30 FPS (ESP 목표)</option><option value="15">15 FPS (저전력)</option></select></label></section>
+        <section class="panel-section stats"><div><span>렌더 방식</span><strong>Canvas 2D + PNG cutout</strong></div><div><span>리그 파츠</span><strong>Base + Eye 5 + Mouth 2</strong></div><div><span>특수 포즈</span><strong>원본 6장 그대로</strong></div><div><span>ESP 저장 후보</span><strong>JPAK / RGB565A8</strong></div></section>
+        <section class="panel-section actions"><button id="cycleBtn">16종 자동 순환</button><button id="qaBtn" class="secondary">Blink/Lip QA</button><button id="resetBtn" class="secondary">초기화</button></section>
+      </aside>
+    </section>
+    <section class="notes-card"><div><strong>이번 프로토타입의 기준</strong><p>새로 그린 얼굴로 교체하지 않고, 제공된 PNG에서 눈/입 픽셀을 추출했다. 생성 이미지 중 원본과 캐릭터성이 달라진 시트는 런타임 에셋에서 제외했다.</p></div><div><strong>ESP32-S3로 옮길 때</strong><p>표정은 파라미터/파츠 스왑, 큰 포즈 변화만 압축 PNG 또는 RGB565A8로 보관한다. 매 프레임 전체 이미지를 저장하지 않는다.</p></div></section>
+  </main>
+  <script src="src/raster-v2/app.js"></script>
+</body>
 </html>
-
